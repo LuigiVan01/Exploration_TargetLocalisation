@@ -57,7 +57,7 @@ class Autopilot(Node):
         """
         resolution = 0.05
         origin = occupancy_data.info.origin.position
-        width = occupancy_data.info.width
+        self.width = occupancy_data.info.width
 
 
 
@@ -73,8 +73,8 @@ class Autopilot(Node):
 
 ###############################################################################
 ###########COMMENTS HERE TO EXPLAIN HOW THIS ACTUALLY WORKS, WHY HARDCODE 384? IS IT SOMETHING TO DO WITH OCCUPANCY GRID TOTAL SIZE?#####################
-        row_index = random_index / width
-        col_index = random_index % width
+        row_index = random_index / self.width
+        col_index = random_index % self.width
 
         self.new_waypoint.pose.position.x = (col_index * resolution) + origin + (resolution/2)
         self.new_waypoint.pose.position.y = (row_index * resolution) + origin + (resolution/2)
@@ -93,7 +93,7 @@ class Autopilot(Node):
 
         for x in range(-3,4):
             for y in range(-3,4):
-                row_index = x * 384 + y
+                row_index = x * self.width + y
                 try:
                     if occupancy_data.data[random_index + row_index] == -1:
                         uncertain_indexes += 1
