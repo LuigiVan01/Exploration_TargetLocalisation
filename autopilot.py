@@ -55,6 +55,12 @@ class Autopilot(Node):
         occupancy_data (OccupancyGrid): map data array from OccupancyGrid type
 
         """
+        resolution = 0.05
+        origin = occupancy_data.info.origin.position
+        width = occupancy_data.info.width
+
+
+
         isthisagoodwaypoint = False
 
         while isthisagoodwaypoint == False:
@@ -62,16 +68,16 @@ class Autopilot(Node):
             self.potential_pos = occupancy_data.data[random_index]
             frontier_detection= self.frontier_check(occupancy_data, random_index)
 
-            if self.potential_pos != -1 and self.potential_pos <= 0.2 and frontier_detection == True:
+            if self.potential_pos != -1 and self.potential_pos <= 20 and frontier_detection == True:
                 isthisagoodwaypoint = True
 
 ###############################################################################
 ###########COMMENTS HERE TO EXPLAIN HOW THIS ACTUALLY WORKS, WHY HARDCODE 384? IS IT SOMETHING TO DO WITH OCCUPANCY GRID TOTAL SIZE?#####################
-        row_index = random_index / 384
-        col_index = random_index % 384
+        row_index = random_index / width
+        col_index = random_index % width
 
-        self.new_waypoint.pose.position.x = col_index * 0.05 - 10 # column * resolution + origin_x
-        self.new_waypoint.pose.position.y = row_index * 0.05 -10 # row * resolution + origin_x
+        self.new_waypoint.pose.position.x = (col_index * resolution) + origin + (resolution/2)
+        self.new_waypoint.pose.position.y = (row_index * resolution) + origin + (resolution/2)
 
         #Publish new waypoint to '/goal_pose'
         self.waypoint_publisher.publish(self.new_waypoint)
@@ -83,14 +89,24 @@ class Autopilot(Node):
         """
         uncertain_indexes = 0
         obstacle_indexes = 0
-        ###################################I'M ASSUMING THE 6X6 GRID IS THE AMOUNT OF SPACE TAKEN UP BY THE TURTLEBOT3
+        #Verifies points in a 6x6 grid around the selected point
 
         for x in range(-3,4):
             for y in range(-3,4):
                 row_index = x * 384 + y
-                
-
-# Hello Luigi
+                try:
+                    if occupancy_data.data[random_index + row_index] == -1:
+                        uncertain_indexes += 1
+                    elif occupancy_data.data[random_index + row_index] > 65:
+                        obstacle_indexes += 1
+                #the index of a point next to the random_index may not be within the range of occupancy_data.data, so the IndexError is handled below
+                except IndexError:
+                    pass
+        #if the point in question (random_index) is next to two uncertain_indexes and not next to more than 3 obstacle_indexes, then this is a valid index along the frontier
+        if uncertain_indexes > 1 and obstacle_indexes < 2:
+            return True
+        else:
+            return False
 
 
     def main():
