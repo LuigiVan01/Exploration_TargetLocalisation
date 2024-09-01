@@ -59,6 +59,10 @@ class Autopilot(Node):
 
             elif event.node_name == 'FollowPath' and event.current_status =='SUCCESS':
                 self.ready = True
+
+            elif event.node_name == 'FollowPath' and event.current_status =='FAILURE':
+                self.ready = True
+                
             else:
                 self.get_logger().info('Event Node Name:')
                 self.get_logger().info(event.node_name)
@@ -74,19 +78,19 @@ class Autopilot(Node):
         obstacle_indexes = 0
         #Verifies points in a 6x6 grid around the selected point
 
-        for x in range(-3,4):
-            for y in range(-3,4):
+        for x in range(-2,3):
+            for y in range(-2,3):
                 row_index = x * self.width + y
                 try:
                     if occupancy_data.data[random_index + row_index] == -1:
                         uncertain_indexes += 1
-                    elif occupancy_data.data[random_index + row_index] > 65:
+                    elif occupancy_data.data[random_index + row_index] > 85:
                         obstacle_indexes += 1
                 #the index of a point next to the random_index may not be within the range of occupancy_data.data, so the IndexError is handled below
                 except IndexError:
                     pass
         #if the point in question (random_index) is next to at least one uncertain_index and not next to between 2 and 4 obstacles, then this is a valid index along the frontier
-        if uncertain_indexes > 0 and 1 < obstacle_indexes < 3:
+        if uncertain_indexes > 1 and 2 < obstacle_indexes < 4:
             return True
         else:
             return False
