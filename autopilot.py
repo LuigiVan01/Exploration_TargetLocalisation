@@ -208,6 +208,9 @@ class Autopilot(Node):
 
             elif event.node_name == 'ComputePathToPose' and event.current_status == "FAILURE":
                 self.ready = True
+
+            elif event.node_name == 'GoalUpdated' and event.current_status == "FAILURE":
+                self.ready = True
                 
             else:
                 #self.get_logger().info('Event Node Name:')
