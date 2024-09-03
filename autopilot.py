@@ -63,7 +63,7 @@ class Autopilot(Node):
         #Create publisher to publish next waypoint parameters to
         self.waypoint_publisher = self.create_publisher(PoseStamped, 'goal_pose', 10)
 
-        #Track number of waypoints sent
+        #Track number of waypoints  sent
         self.waypoint_counter = 0.0
 
 
@@ -103,16 +103,32 @@ class Autopilot(Node):
         occupancy_data_np_checked = []
     
         while isthisagoodwaypoint == False:
-            random_index = randrange(occupancy_data_np.size)
-            self.potential_pos = occupancy_data_np[random_index]
-            frontier_detection= self.frontier_check(occupancy_data_np, random_index)
-            #Add index to list of checked indices so that it's not checked twice
-            if random_index in occupancy_data_np_checked:
-                pass
-            occupancy_data_np_checked = np.append(occupancy_data_np, random_index)
 
-            #CRITERIA FOR A 'GOOD' WAYPOINT
-            if self.potential_pos != -1 and self.potential_pos <= 20 and frontier_detection == True:
+            self.get_logger().info('Searching for good point...')
+
+            # Taking a random cell  
+            random_index = randrange(occupancy_data_np.size)
+            if random_index in occupancy_data_np_checked:
+                continue
+
+            # Check that the cell is not unknown or an obstacle
+            self.potential_pos = occupancy_data_np[random_index]
+            if self.potential_pos==-1:
+                continue
+            if self.potential_pos>=75:
+                self.get_logger().info('Point was an obstacle')
+                occupancy_data_np_checked = np.append(occupancy_data_np, random_index)
+                continue
+            
+            # Check that the point is on the frontier
+            frontier_detection= self.frontier_check(occupancy_data_np, random_index)
+            if frontier_detection==False:
+                self.get_logger().info('Point was not on frontier')
+                occupancy_data_np_checked = np.append(occupancy_data_np, random_index)
+                continue
+
+            #CRITERIA FOR A 'GOOD' WAYPOINT  
+            if  self.potential_pos <= 20 :
                 self.get_logger().info('Found Good Point')
                 row_index = random_index / self.width
                 col_index = random_index % self.width
@@ -128,10 +144,10 @@ class Autopilot(Node):
                     self.get_logger().info(str(distance))
                     isthisagoodwaypoint = True
                 else:
-                    self.get_logger().info('Bad Point Finding New...')
+                    self.get_logger().info('Too far point, Finding New...')
                     isthisagoodwaypoint = False
                 
-            self.get_logger().info('Searching for good point...')
+            
 
 
         self.get_logger().info('Publishing waypoint...')
@@ -167,7 +183,7 @@ class Autopilot(Node):
                         obstacle_indexes += 1
                 #the index of a point next to the random_index may not be within the range of occupancy_data.data, so the IndexError is handled below
                 except IndexError:
-                    pass
+                    continue
         #if the point in question (random_index) is next to at least one uncertain_index and not next to between 2 and 4 obstacles, then this is a valid index along the frontier
         if uncertain_indexes > 2 and 0 < obstacle_indexes < 3:
             return True
