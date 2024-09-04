@@ -68,13 +68,6 @@ class Autopilot(Node):
 
 
 
-
-
-
-
-
-
-
     def next_waypoint(self, occupancy_data):
         """Callback function to choose next waypoint when new occupancy grid is received, and old goal is either destroyed or achieved
 
