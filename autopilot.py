@@ -71,7 +71,7 @@ class Autopilot(Node):
 
 
 
-    def next_waypoint(self, occupancy_data):
+    def next_waypoint(self, occupancy_data:OccupancyGrid):
         """Callback function to choose next waypoint when new occupancy grid is received, and old goal is either destroyed or achieved
 
         Args:
@@ -92,7 +92,7 @@ class Autopilot(Node):
         origin_x = occupancy_data.info.origin.position.x
         self.width = occupancy_data.info.width
         isthisagoodwaypoint = False
-        min_distance = 0
+        min_distance = 8
         max_distance = float('inf')
         self.searching_for_waypoint = True
         occupancy_data_np = np.array(occupancy_data.data)
@@ -126,7 +126,8 @@ class Autopilot(Node):
             #CRITERIA FOR A 'GOOD' WAYPOINT  
             if  self.potential_pos <= 20 :
                 self.get_logger().info('Found Good Point')
-                row_index = random_index / self.width
+                row_index_float = random_index / self.width
+                row_index = math.ceil(row_index_float)
                 col_index = random_index % self.width
 
                 self.get_logger().info('Checking Point Distance')
@@ -140,7 +141,7 @@ class Autopilot(Node):
                     self.get_logger().info(str(distance))
                     isthisagoodwaypoint = True
                 else:
-                    self.get_logger().info('Point not in range, finding new...')
+                    self.get_logger().info('Too far point, Finding New...')
                     isthisagoodwaypoint = False
                 
             
