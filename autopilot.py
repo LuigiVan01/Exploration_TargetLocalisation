@@ -26,6 +26,9 @@ class Autopilot(Node):
         #Allow callback functions to be called in parallel
         self.parallel_callback_group = ReentrantCallbackGroup()
 
+        #Initilizing the probablity at which we consider there to be an obstacle
+        self.obstacle_probability = 55
+
         #Initializing x and y coordinates of Turtlebot in space, to be populated later
         self.new_waypoint = PoseStamped()
         self.new_waypoint.header.frame_id = 'map'
@@ -89,7 +92,7 @@ class Autopilot(Node):
         origin_x = occupancy_data.info.origin.position.x
         self.width = occupancy_data.info.width
         isthisagoodwaypoint = False
-        min_distance = 10
+        min_distance = 8
         max_distance = float('inf')
         self.searching_for_waypoint = True
         occupancy_data_np = np.array(occupancy_data.data)
@@ -108,7 +111,7 @@ class Autopilot(Node):
             self.potential_pos = occupancy_data_np[random_index]
             if self.potential_pos==-1:
                 continue
-            if self.potential_pos>=75:
+            if self.potential_pos>= self.obstacle_probability:
                 self.get_logger().info('Point was an obstacle')
                 occupancy_data_np_checked = np.append(occupancy_data_np, random_index)
                 continue
@@ -128,7 +131,7 @@ class Autopilot(Node):
 
                 self.get_logger().info('Checking Point Distance')
                 #Find straightline distance between Turtlebot and current point, using pythag
-                distance = math.sqrt((row_index - self.current_position.pose.position.x)**2 + (col_index - self.current_position.pose.position.y)**2)
+                distance = math.sqrt((((row_index*resolution) + origin_x +(resolution/2)) - self.current_position.pose.position.x)**2 + (((col_index*resolution) + origin_x + (resolution/2)) - self.current_position.pose.position.y)**2)
 
                 if min_distance < distance < max_distance:
                     self.new_waypoint.pose.position.x = (col_index * resolution) + origin_x + (resolution/2)
@@ -172,13 +175,13 @@ class Autopilot(Node):
                 try:
                     if occupancy_data_np[random_index + row_index] == -1:
                         uncertain_indexes += 1
-                    elif occupancy_data_np[random_index + row_index] > 75:
+                    elif occupancy_data_np[random_index + row_index] > self.obstacle_probability:
                         obstacle_indexes += 1
                 #the index of a point next to the random_index may not be within the range of occupancy_data.data, so the IndexError is handled below
                 except IndexError:
                     continue
-        #if the point in question (random_index) is next to at least one uncertain_index and not next to between 2 and 4 obstacles, then this is a valid index along the frontier
-        if uncertain_indexes > 2 and 0 < obstacle_indexes < 3:
+        #Code to determine how many uncertain and obstacle indices need to be near our point
+        if uncertain_indexes > 2 and 0 < obstacle_indexes:
             return True
         else:
             return False
