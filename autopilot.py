@@ -92,7 +92,7 @@ class Autopilot(Node):
         origin_x = occupancy_data.info.origin.position.x
         self.width = occupancy_data.info.width
         isthisagoodwaypoint = False
-        min_distance = 8
+        min_distance = 0
         max_distance = float('inf')
         self.searching_for_waypoint = True
         occupancy_data_np = np.array(occupancy_data.data)
@@ -140,7 +140,7 @@ class Autopilot(Node):
                     self.get_logger().info(str(distance))
                     isthisagoodwaypoint = True
                 else:
-                    self.get_logger().info('Too far point, Finding New...')
+                    self.get_logger().info('Point not in range, finding new...')
                     isthisagoodwaypoint = False
                 
             
