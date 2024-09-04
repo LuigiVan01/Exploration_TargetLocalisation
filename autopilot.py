@@ -111,13 +111,15 @@ class Autopilot(Node):
             self.potential_pos = occupancy_data_np[random_index]
             if self.potential_pos==-1:
                 continue
+
             if self.potential_pos>= self.obstacle_probability:
                 self.get_logger().info('Point was an obstacle')
                 occupancy_data_np_checked = np.append(occupancy_data_np, random_index)
                 continue
             
             # Check that the point is on the frontier
-            frontier_detection= self.frontier_check(occupancy_data_np, random_index)
+            frontier_detection = self.frontier_check(occupancy_data_np, random_index)
+
             if frontier_detection==False:
                 self.get_logger().info('Point was not on frontier')
                 occupancy_data_np_checked = np.append(occupancy_data_np, random_index)
@@ -132,11 +134,14 @@ class Autopilot(Node):
 
                 self.get_logger().info('Checking Point Distance')
                 #Find straightline distance between Turtlebot and current point, using pythag
-                distance = math.sqrt((((row_index*resolution) + origin_x +(resolution/2)) - self.current_position.pose.position.x)**2 + (((col_index*resolution) + origin_x + (resolution/2)) - self.current_position.pose.position.y)**2)
+
+                x_coord = (row_index*resolution) + origin_x +(resolution/2)
+                y_coord = (col_index*resolution) + origin_x + (resolution/2)
+                distance = math.sqrt((abs(x_coord) - abs(self.current_position.pose.position.x))**2 + (abs(y_coord) - abs(self.current_position.pose.position.y))**2)
 
                 if min_distance < distance < max_distance:
-                    self.new_waypoint.pose.position.x = (col_index * resolution) + origin_x + (resolution/2)
-                    self.new_waypoint.pose.position.y = (row_index * resolution) + origin_x + (resolution/2)
+                    self.new_waypoint.pose.position.x = x_coord
+                    self.new_waypoint.pose.position.y = y_coord
                     self.get_logger().info('Point Distance:')
                     self.get_logger().info(str(distance))
                     isthisagoodwaypoint = True
@@ -182,7 +187,7 @@ class Autopilot(Node):
                 except IndexError:
                     continue
         #Code to determine how many uncertain and obstacle indices need to be near our point
-        if uncertain_indexes > 2 and 0 < obstacle_indexes:
+        if uncertain_indexes > 0: #and 0 < obstacle_indexes:
             return True
         else:
             return False
@@ -213,8 +218,8 @@ class Autopilot(Node):
                 self.ready = True
                 #self.next_waypoint(occupancy_data=self.occupancy_grid)
 
-            elif event.node_name == 'RateController' and event.current_status == 'RUNNING':
-                self.ready = False
+            #elif event.node_name == 'RateController' and event.current_status == 'RUNNING':
+            #    self.ready = False
             
             elif event.node_name == 'FollowPath' and event.current_status =='SUCCESS':
                 self.ready = True
@@ -222,8 +227,8 @@ class Autopilot(Node):
             elif event.node_name == 'ComputePathToPose' and event.current_status == "FAILURE":
                 self.ready = True
 
-            elif event.node_name == 'GoalUpdated' and event.current_status == "FAILURE":
-                self.ready = True
+            #elif event.node_name == 'GoalUpdated' and event.current_status == "FAILURE":
+            #    self.ready = True
                 
             else:
                 #self.get_logger().info('Event Node Name:')
