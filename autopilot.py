@@ -27,7 +27,7 @@ class Autopilot(Node):
         self.parallel_callback_group = ReentrantCallbackGroup()
 
         #Initilizing the probablity at which we consider there to be an obstacle
-        self.obstacle_probability = 55
+        self.obstacle_probability = 75
 
         #Initializing x and y coordinates of Turtlebot in space, to be populated later
         self.new_waypoint = PoseStamped()
@@ -38,6 +38,7 @@ class Autopilot(Node):
 
         #Initializing current position variable
         self.current_position = PoseStamped()
+        self.new_waypoint.header.frame_id = 'map'
 
         #Initializing behaviortreelog node name and status
         self.last_node_name = 'string'
@@ -92,8 +93,8 @@ class Autopilot(Node):
         origin_x = occupancy_data.info.origin.position.x
         self.width = occupancy_data.info.width
         isthisagoodwaypoint = False
-        min_distance = 0
-        max_distance = float('inf')
+        min_distance = 2
+        max_distance = 4
         self.searching_for_waypoint = True
         occupancy_data_np = np.array(occupancy_data.data)
         occupancy_data_np_checked = []
@@ -136,8 +137,10 @@ class Autopilot(Node):
                 #Find straightline distance between Turtlebot and current point, using pythag
 
                 x_coord = (row_index*resolution) + origin_x +(resolution/2)
+                
                 y_coord = (col_index*resolution) + origin_x + (resolution/2)
                 distance = math.sqrt((abs(x_coord) - abs(self.current_position.pose.position.x))**2 + (abs(y_coord) - abs(self.current_position.pose.position.y))**2)
+
 
                 if min_distance < distance < max_distance:
                     self.new_waypoint.pose.position.x = x_coord
@@ -174,9 +177,10 @@ class Autopilot(Node):
         """
         uncertain_indexes = 0
         obstacle_indexes = 0
+
         #Inspects the nature of points in a grid around the selected point
-        for x in range(-4,5):
-            for y in range(-4,5):
+        for x in range(-2,3):
+            for y in range(-2,3):
                 row_index = x * self.width + y
                 try:
                     if occupancy_data_np[random_index + row_index] == -1:
@@ -187,7 +191,7 @@ class Autopilot(Node):
                 except IndexError:
                     continue
         #Code to determine how many uncertain and obstacle indices need to be near our point
-        if uncertain_indexes > 0: #and 0 < obstacle_indexes:
+        if uncertain_indexes > 1 and 1 < obstacle_indexes:
             return True
         else:
             return False
@@ -199,7 +203,7 @@ class Autopilot(Node):
 
     def current_position_callback(self, msg:PoseWithCovarianceStamped):
         #Return current robot pose, unless searching_for_waypoint
-
+        msg.header.frame_id = 'map'
         if self.searching_for_waypoint == False:
             self.current_position.pose.position.x = msg.pose.pose.position.x
             self.current_position.pose.position.y = msg.pose.pose.position.y
