@@ -29,6 +29,8 @@ class Autopilot(Node):
         #Initilizing the probablity at which we consider there to be an obstacle
         self.obstacle_probability = 75
 
+        self.start=True
+
         #Initializing x and y coordinates of Turtlebot in space, to be populated later
         self.new_waypoint = PoseStamped()
         self.new_waypoint.header.frame_id = 'map'
@@ -41,7 +43,7 @@ class Autopilot(Node):
         self.new_waypoint.header.frame_id = 'map'
 
         #Initializing behaviortreelog node name and status
-        self.last_node_name = 'string'
+        self.last_node_name   = 'string'
         self.last_node_status = 'string'
     
         #Initializing waiting counter
@@ -58,7 +60,7 @@ class Autopilot(Node):
 
         #Subscribe to OccupancyGrid type topic "/map"
         self.potential_pos = OccupancyGrid()
-        self.occupancy_grid = self.create_subscription(OccupancyGrid, '/map', self.next_waypoint, 10)
+        self.occupancy_grid = self.create_subscription(OccupancyGrid, '/map', self.store_grid, 10)
 
         #Subscribe to /pose to determine position of Turtlebot
         self.position_subscriber = self.create_subscription(PoseWithCovarianceStamped, '/pose', self.current_position_callback, 10, callback_group=self.parallel_callback_group)
@@ -71,48 +73,69 @@ class Autopilot(Node):
         self.waypoint_counter = 0.0
 
 
+    def store_grid(self,grid:OccupancyGrid):
+        """ 
+            Callback function of /map topic.
+            Everytime it receive te OccupacyGrid message it stores it. 
+            At the start it launches the next_point() method since no message is received from the behavior_tree_log.
+        """
+        self.current_grid=grid
+        self.get_logger().info('Grid Received')
 
-    def next_waypoint(self, occupancy_data:OccupancyGrid):
-        """Callback function to choose next waypoint when new occupancy grid is received, and old goal is either destroyed or achieved
+        if self.start:
+
+            self.start=False
+            self.next_waypoint()
+            
+            
+
+
+
+    def next_waypoint(self):
+        """
+        Function to choose next waypoint when new occupancy grid is received, and old goal is either destroyed or achieved
 
         Args:
         self (Node): Autopilot node currently running and storing waypoint decisions 
-        occupancy_data (OccupancyGrid): map data array from OccupancyGrid type
-
         """
         #DEBUGGING CONDITIONAL TO FIGURE OUT THE BEHAVIORTREELOG STATUS WHEN SYSTEM IS STUCK. MAYBE AN IMPLEMENTATION OF CHOOSING A NEW WAYPOINT WHEN ONE HAS NOT BEEN CHOSEN IN X AMOUNT OF TIME IS A BETTER IDEA
-        if self.ready == False:
-            self.get_logger().info('Waiting for last command to execute')
-            self.waiting_counter += 1 
-            if self.waiting_counter > 3:
-                self.get_logger().info(str(self.last_node_name))
-                self.get_logger().info(str(self.last_node_status))
-            return
+        # if self.ready == False:
+        #   self.get_logger().info('Waiting for last command to execute')
+        #   self.waiting_counter += 1 
+        #  if self.waiting_counter > 3:
+        #    self.get_logger().info(str(self.last_node_name))
+        #    self.get_logger().info(str(self.last_node_status))
+            #return
 
         resolution = 0.05
-        origin_x = occupancy_data.info.origin.position.x
-        self.width = occupancy_data.info.width
+        origin_x = self.current_grid.info.origin.position.x
+        origin_y = self.current_grid.info.origin.position.y
+        self.width = self.current_grid.info.width
         isthisagoodwaypoint = False
-        min_distance = 2
-        max_distance = 4
+
+        #TODO: Tune these values 
+        min_distance = 1 
+        max_distance = 1000
+
         self.searching_for_waypoint = True
-        occupancy_data_np = np.array(occupancy_data.data)
+        occupancy_data_np = np.array(self.current_grid.data)
         occupancy_data_np_checked = []
     
         while isthisagoodwaypoint == False:
 
             self.get_logger().info('Searching for good point...')
 
-            # Taking a random cell  
+            # Taking a random cell 
             random_index = randrange(occupancy_data_np.size)
             if random_index in occupancy_data_np_checked:
                 continue
 
-            # Check that the cell is not unknown or an obstacle
+            # Check that the cell is not unknown 
             self.potential_pos = occupancy_data_np[random_index]
             if self.potential_pos==-1:
                 continue
 
+            # Check that the cell is not an obstacle
             if self.potential_pos>= self.obstacle_probability:
                 self.get_logger().info('Point was an obstacle')
                 occupancy_data_np_checked = np.append(occupancy_data_np, random_index)
@@ -120,7 +143,6 @@ class Autopilot(Node):
             
             # Check that the point is on the frontier
             frontier_detection = self.frontier_check(occupancy_data_np, random_index)
-
             if frontier_detection==False:
                 self.get_logger().info('Point was not on frontier')
                 occupancy_data_np_checked = np.append(occupancy_data_np, random_index)
@@ -129,17 +151,21 @@ class Autopilot(Node):
             #CRITERIA FOR A 'GOOD' WAYPOINT  
             if  self.potential_pos <= 20 :
                 self.get_logger().info('Found Good Point')
+
+                # Compute correspondent row and column of the potential cell
                 row_index_float = random_index / self.width
                 row_index = math.ceil(row_index_float)
                 col_index = random_index % self.width
-
+ 
                 self.get_logger().info('Checking Point Distance')
                 #Find straightline distance between Turtlebot and current point, using pythag
 
-                x_coord = (row_index*resolution) + origin_x +(resolution/2)
-                
-                y_coord = (col_index*resolution) + origin_x + (resolution/2)
-                distance = math.sqrt((abs(x_coord) - abs(self.current_position.pose.position.x))**2 + (abs(y_coord) - abs(self.current_position.pose.position.y))**2)
+                #TODO: find a reliable way to compute this dinstance
+                # Compute position with respect map fram of the potential cell
+                x_coord = (col_index*resolution) + origin_x + (resolution/2)
+                y_coord = (row_index*resolution) + origin_y + (resolution/2)
+
+                distance = math.sqrt((x_coord - self.current_position.pose.position.x)**2 + (y_coord - self.current_position.pose.position.y)**2)
 
 
                 if min_distance < distance < max_distance:
@@ -179,8 +205,9 @@ class Autopilot(Node):
         obstacle_indexes = 0
 
         #Inspects the nature of points in a grid around the selected point
-        for x in range(-2,3):
-            for y in range(-2,3):
+        #TODO: Tune these values 
+        for x in range(-4,5):
+            for y in range(-4,5):
                 row_index = x * self.width + y
                 try:
                     if occupancy_data_np[random_index + row_index] == -1:
@@ -199,8 +226,6 @@ class Autopilot(Node):
 
 
 
-
-
     def current_position_callback(self, msg:PoseWithCovarianceStamped):
         #Return current robot pose, unless searching_for_waypoint
         msg.header.frame_id = 'map'
@@ -211,13 +236,24 @@ class Autopilot(Node):
 
 
 
-
-
-
-
     def readiness_check(self, msg:BehaviorTreeLog):
-        #If latest node state of /behavior_tree_log is "NavigateRecovery" and event status is "IDLE", send next waypoint
+        """
+        Call the next_waypoint() when specific conditions of the BehaviorTreeLog message are satisfied
+        """
+
         for event in msg.event_log:
+
+            if event.node_name == 'NavigationRecovery' and event.current_status =='IDLE':
+                #self.ready = True
+                self.next_waypoint()
+
+            elif event.node_name == 'NavigateRecovery' and event.current_status =='IDLE':
+                #self.ready = True
+                self.next_waypoint()
+
+            elif event.node_name == 'GoalUpdated' and event.current_status == "FAILURE":
+                self.next_waypoint()
+        '''
             if event.node_name == 'IsGoalReached' and event.current_status =='SUCCESS':
                 self.ready = True
                 #self.next_waypoint(occupancy_data=self.occupancy_grid)
@@ -231,9 +267,7 @@ class Autopilot(Node):
             elif event.node_name == 'ComputePathToPose' and event.current_status == "FAILURE":
                 self.ready = True
 
-            #elif event.node_name == 'GoalUpdated' and event.current_status == "FAILURE":
-            #    self.ready = True
-                
+            
             else:
                 #self.get_logger().info('Event Node Name:')
                 #self.get_logger().info(event.node_name)
@@ -242,6 +276,7 @@ class Autopilot(Node):
                 #self.get_logger().info(event.current_status)
                 self.last_node_status = event.current_status
                 return
+                '''
             
     
 
