@@ -89,8 +89,6 @@ class Autopilot(Node):
             
             
 
-
-
     def next_waypoint(self):
         """
         Function to choose next waypoint when new occupancy grid is received, and old goal is either destroyed or achieved
@@ -115,15 +113,18 @@ class Autopilot(Node):
 
         #TODO: Tune these values 
         min_distance = 1 
-        max_distance = 1000
+        max_distance = 5000
 
         self.searching_for_waypoint = True
+        self.still_looking = False
         occupancy_data_np = np.array(self.current_grid.data)
         occupancy_data_np_checked = []
     
         while isthisagoodwaypoint == False:
-
-            self.get_logger().info('Searching for good point...')
+            #Added this so that the terminal isn't filled with messages so it's easier to read
+            if self.still_looking == False:
+                self.get_logger().info('Searching for good point...')
+                self.still_looking = True
 
             # Taking a random cell 
             random_index = randrange(occupancy_data_np.size)
@@ -160,7 +161,7 @@ class Autopilot(Node):
                 self.get_logger().info('Checking Point Distance')
                 #Find straightline distance between Turtlebot and current point, using pythag
 
-                #TODO: find a reliable way to compute this dinstance
+                #TODO: find a reliable way to compute this distance
                 # Compute position with respect map fram of the potential cell
                 x_coord = (col_index*resolution) + origin_x + (resolution/2)
                 y_coord = (row_index*resolution) + origin_y + (resolution/2)
@@ -177,6 +178,7 @@ class Autopilot(Node):
                 else:
                     self.get_logger().info('Point not in range, Finding New...')
                     isthisagoodwaypoint = False
+                    self.still_looking = False
                 
             
 
@@ -190,11 +192,6 @@ class Autopilot(Node):
             self.ready = True
 
         self.waiting_counter = 0
-
-
-
-
-
 
 
     def frontier_check(self, occupancy_data_np, random_index):
@@ -218,7 +215,7 @@ class Autopilot(Node):
                 except IndexError:
                     continue
         #Code to determine how many uncertain and obstacle indices need to be near our point
-        if uncertain_indexes > 1 and 1 < obstacle_indexes:
+        if uncertain_indexes > 1: #and 0 < obstacle_indexes:
             return True
         else:
             return False
