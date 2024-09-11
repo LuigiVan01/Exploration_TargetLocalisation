@@ -28,7 +28,7 @@ class Autopilot(Node):
         self.parallel_callback_group = ReentrantCallbackGroup()
 
         #Initilizing the probablity at which we consider there to be an obstacle
-        self.obstacle_probability = 75
+        self.obstacle_probability = 65
 
         self.start=True
 
@@ -47,7 +47,14 @@ class Autopilot(Node):
 
         #Initializing current position variable
         self.current_position = PointStamped()
-        self.new_waypoint.header.frame_id = 'map'
+        self.current_position.header.frame_id = 'map'
+
+        #Initializing old waypoint variable
+        self.old_point = PointStamped()
+        self.old_point.header.frame_id = 'map'
+        self.old_point.point.x = float('inf')
+        self.old_point.point.y = float('inf')
+
 
         #Initializing behaviortreelog node name and status
         self.last_node_name   = 'string'
@@ -126,8 +133,9 @@ class Autopilot(Node):
         isthisagoodwaypoint = False
 
         #TODO: Tune these values 
-        min_distance = 1 
-        max_distance = 5000
+        old_min_distance = 1
+        min_distance = 2
+        max_distance = 5
 
         self.searching_for_waypoint = True
         self.still_looking = False
@@ -182,30 +190,45 @@ class Autopilot(Node):
 
                 self.potential_coordinate.point.x = x_coord
                 self.potential_coordinate.point.y = y_coord
+
+                self.get_logger().info('Goal Position Coordinates')
+                self.get_logger().info(str(self.potential_coordinate.point.x))
+                self.get_logger().info(str(self.potential_coordinate.point.y))
+                self.get_logger().info(str(self.potential_coordinate.header.frame_id))
+
                 self.potential_publisher.publish(self.potential_coordinate)
 
+                self.get_logger().info('Current Position Coordinates')
+                self.get_logger().info(str(self.current_position.point.x))
+                self.get_logger().info(str(self.current_position.point.y))
+                self.get_logger().info(str(self.current_position.header.frame_id))
                 self.current_publisher.publish(self.current_position)
 
 
-                distance = math.sqrt((x_coord - self.current_position.point.x)**2 + (y_coord - self.current_position.point.y)**2)
+                distance2new = math.sqrt((x_coord - self.current_position.point.x)**2 + (y_coord - self.current_position.point.y)**2)
 
+                #checking if the new point is far enough away from the old point
+                distance2old = math.sqrt((self.old_point.point.x - self.current_position.point.x)**2 + (self.old_point.point.y - self.current_position.point.y)**2)
 
-                if min_distance < distance < max_distance:
+                if min_distance < distance2new < max_distance and distance2old > old_min_distance:
                     self.new_waypoint.pose.position.x = x_coord
                     self.new_waypoint.pose.position.y = y_coord
                     self.get_logger().info('Point Distance:')
-                    self.get_logger().info(str(distance))
+                    self.get_logger().info(str(distance2new))
                     isthisagoodwaypoint = True
+
                 else:
                     self.get_logger().info('Point not in range, Finding New...')
                     isthisagoodwaypoint = False
                     self.still_looking = False
-                
-            
-
 
         self.get_logger().info('Publishing waypoint...')
         self.waypoint_publisher.publish(self.new_waypoint)
+
+        #Storing waypoint for comparison during next loop        
+        self.old_point.point.x = self.new_waypoint.pose.position.x
+        self.old_point.point.y = self.new_waypoint.pose.position.y
+
         self.ready = False
 
         #DEBUGGING CONDITIONAL AS ROBOT WAS GETTING STUCK DURING STARTUP, AND SELF.READY WOULD NEVER CHANGE BECAUSE THE BEHAVIORTREELOG TOPIC WAS NOT BEING PUBLISHED TO
@@ -236,7 +259,7 @@ class Autopilot(Node):
                 except IndexError:
                     continue
         #Code to determine how many uncertain and obstacle indices need to be near our point
-        if uncertain_indexes > 1: #and 0 < obstacle_indexes:
+        if uncertain_indexes > 1:# and 0 < obstacle_indexes:
             return True
         else:
             return False
@@ -246,10 +269,11 @@ class Autopilot(Node):
 
     def current_position_callback(self, msg:PoseWithCovarianceStamped):
         #Return current robot pose, unless searching_for_waypoint
-        if self.searching_for_waypoint == False:
-            self.current_position.point.x = msg.pose.pose.position.x
-            self.current_position.point.y = msg.pose.pose.position.y
-            #self.msg.header.frame_id = msg.header.frame_id
+        self.current_position.point.x = msg.pose.pose.position.x
+        self.current_position.point.y = msg.pose.pose.position.y
+        self.current_position.header.frame_id = msg.header.frame_id
+        #if self.searching_for_waypoint == False:
+            
 
 
 
