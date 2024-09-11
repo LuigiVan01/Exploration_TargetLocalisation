@@ -9,6 +9,7 @@ from nav_msgs.msg import OccupancyGrid
 from nav2_msgs.msg import BehaviorTreeLog
 from geometry_msgs.msg import PoseWithCovarianceStamped
 from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import PointStamped
 
 
 
@@ -38,8 +39,14 @@ class Autopilot(Node):
         self.new_waypoint.pose.position.y = 0.0
         self.new_waypoint.pose.orientation.w = 1.0
 
+        #Initializing potential_coordinate for debugging
+        self.potential_coordinate = PointStamped()
+        self.potential_coordinate.header.frame_id = 'map'
+        self.potential_coordinate.point.x = 0.0
+        self.potential_coordinate.point.y = 0.0
+
         #Initializing current position variable
-        self.current_position = PoseStamped()
+        self.current_position = PointStamped()
         self.new_waypoint.header.frame_id = 'map'
 
         #Initializing behaviortreelog node name and status
@@ -68,6 +75,13 @@ class Autopilot(Node):
         
         #Create publisher to publish next waypoint parameters to
         self.waypoint_publisher = self.create_publisher(PoseStamped, 'goal_pose', 10)
+
+        #Publisher for publishing potential waypoints to for bug fixing
+        self.potential_publisher = self.create_publisher(PointStamped, 'potential_point', 10)
+
+        #Publisher for publishing current coordinate for bug fixing
+        self.current_publisher = self.create_publisher(PointStamped, 'current_point', 10)
+
 
         #Track number of waypoints  sent
         self.waypoint_counter = 0.0
@@ -163,10 +177,17 @@ class Autopilot(Node):
 
                 #TODO: find a reliable way to compute this distance
                 # Compute position with respect map fram of the potential cell
-                x_coord = (col_index*resolution) + origin_x + (resolution/2)
-                y_coord = (row_index*resolution) + origin_y + (resolution/2)
+                x_coord = (col_index*resolution) + origin_x
+                y_coord = (row_index*resolution) + origin_y
 
-                distance = math.sqrt((x_coord - self.current_position.pose.position.x)**2 + (y_coord - self.current_position.pose.position.y)**2)
+                self.potential_coordinate.point.x = x_coord
+                self.potential_coordinate.point.y = y_coord
+                self.potential_publisher.publish(self.potential_coordinate)
+
+                self.current_publisher.publish(self.current_position)
+
+
+                distance = math.sqrt((x_coord - self.current_position.point.x)**2 + (y_coord - self.current_position.point.y)**2)
 
 
                 if min_distance < distance < max_distance:
@@ -225,10 +246,10 @@ class Autopilot(Node):
 
     def current_position_callback(self, msg:PoseWithCovarianceStamped):
         #Return current robot pose, unless searching_for_waypoint
-        msg.header.frame_id = 'map'
         if self.searching_for_waypoint == False:
-            self.current_position.pose.position.x = msg.pose.pose.position.x
-            self.current_position.pose.position.y = msg.pose.pose.position.y
+            self.current_position.point.x = msg.pose.pose.position.x
+            self.current_position.point.y = msg.pose.pose.position.y
+            #self.msg.header.frame_id = msg.header.frame_id
 
 
 
