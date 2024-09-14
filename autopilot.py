@@ -28,7 +28,7 @@ class Autopilot(Node):
         self.parallel_callback_group = ReentrantCallbackGroup()
 
         #Initilizing the probablity at which we consider there to be an obstacle
-        self.obstacle_probability = 65
+        self.obstacle_probability = 60
 
         self.start=True
 
@@ -55,19 +55,6 @@ class Autopilot(Node):
         self.old_point.point.x = float('inf')
         self.old_point.point.y = float('inf')
 
-
-        #Initializing behaviortreelog node name and status
-        self.last_node_name   = 'string'
-        self.last_node_status = 'string'
-    
-        #Initializing waiting counter
-        self.waiting_counter = 0
-
-        #Initializing current state of waypoint searching
-        self.searching_for_waypoint = False
-
-        #Initialize variable to capture behavior tree state
-        self.ready = True
 
         #Subscribe to /behavior_tree_log to determine when Turtlebot is ready for a new waypoint
         self.behaviortreelogstate = self.create_subscription(BehaviorTreeLog, 'behavior_tree_log', self.readiness_check, 10, callback_group=self.parallel_callback_group)
@@ -117,14 +104,6 @@ class Autopilot(Node):
         Args:
         self (Node): Autopilot node currently running and storing waypoint decisions 
         """
-        #DEBUGGING CONDITIONAL TO FIGURE OUT THE BEHAVIORTREELOG STATUS WHEN SYSTEM IS STUCK. MAYBE AN IMPLEMENTATION OF CHOOSING A NEW WAYPOINT WHEN ONE HAS NOT BEEN CHOSEN IN X AMOUNT OF TIME IS A BETTER IDEA
-        # if self.ready == False:
-        #   self.get_logger().info('Waiting for last command to execute')
-        #   self.waiting_counter += 1 
-        #  if self.waiting_counter > 3:
-        #    self.get_logger().info(str(self.last_node_name))
-        #    self.get_logger().info(str(self.last_node_status))
-            #return
 
         resolution = 0.05
         origin_x = self.current_grid.info.origin.position.x
@@ -133,16 +112,15 @@ class Autopilot(Node):
         isthisagoodwaypoint = False
 
         #TODO: Tune these values 
-        old_min_distance = 1
-        min_distance = 2
+        min_distance = 1
         max_distance = 5
 
-        self.searching_for_waypoint = True
         self.still_looking = False
         occupancy_data_np = np.array(self.current_grid.data)
         occupancy_data_np_checked = []
     
         while isthisagoodwaypoint == False:
+
             #Added this so that the terminal isn't filled with messages so it's easier to read
             if self.still_looking == False:
                 self.get_logger().info('Searching for good point...')
@@ -161,14 +139,14 @@ class Autopilot(Node):
             # Check that the cell is not an obstacle
             if self.potential_pos>= self.obstacle_probability:
                 self.get_logger().info('Point was an obstacle')
-                occupancy_data_np_checked = np.append(occupancy_data_np, random_index)
+                occupancy_data_np_checked = np.append(occupancy_data_np_checked, random_index)
                 continue
             
             # Check that the point is on the frontier
             frontier_detection = self.frontier_check(occupancy_data_np, random_index)
             if frontier_detection==False:
                 self.get_logger().info('Point was not on frontier')
-                occupancy_data_np_checked = np.append(occupancy_data_np, random_index)
+                occupancy_data_np_checked = np.append(occupancy_data_np_checked, random_index)
                 continue
 
             #CRITERIA FOR A 'GOOD' WAYPOINT  
@@ -176,41 +154,26 @@ class Autopilot(Node):
                 self.get_logger().info('Found Good Point')
 
                 # Compute correspondent row and column of the potential cell
-                row_index_float = random_index / self.width
-                row_index = math.ceil(row_index_float)
+                slider_float = random_index / self.width
+                slider = math.ceil(slider_float)
                 col_index = random_index % self.width
- 
-                self.get_logger().info('Checking Point Distance')
-                #Find straightline distance between Turtlebot and current point, using pythag
 
-                #TODO: find a reliable way to compute this distance
-                # Compute position with respect map fram of the potential cell
+                # Compute position with respect map frame of the potential cell
                 x_coord = (col_index*resolution) + origin_x
-                y_coord = (row_index*resolution) + origin_y
+                y_coord = (slider*resolution) + origin_y
 
                 self.potential_coordinate.point.x = x_coord
                 self.potential_coordinate.point.y = y_coord
 
-                self.get_logger().info('Goal Position Coordinates')
-                self.get_logger().info(str(self.potential_coordinate.point.x))
-                self.get_logger().info(str(self.potential_coordinate.point.y))
-                self.get_logger().info(str(self.potential_coordinate.header.frame_id))
-
                 self.potential_publisher.publish(self.potential_coordinate)
 
-                self.get_logger().info('Current Position Coordinates')
-                self.get_logger().info(str(self.current_position.point.x))
-                self.get_logger().info(str(self.current_position.point.y))
-                self.get_logger().info(str(self.current_position.header.frame_id))
                 self.current_publisher.publish(self.current_position)
 
-
+                self.get_logger().info('Checking Point Distance')
                 distance2new = math.sqrt((x_coord - self.current_position.point.x)**2 + (y_coord - self.current_position.point.y)**2)
 
-                #checking if the new point is far enough away from the old point
-                distance2old = math.sqrt((self.old_point.point.x - self.current_position.point.x)**2 + (self.old_point.point.y - self.current_position.point.y)**2)
 
-                if min_distance < distance2new < max_distance and distance2old > old_min_distance:
+                if min_distance < distance2new < max_distance:
                     self.new_waypoint.pose.position.x = x_coord
                     self.new_waypoint.pose.position.y = y_coord
                     self.get_logger().info('Point Distance:')
@@ -225,17 +188,12 @@ class Autopilot(Node):
         self.get_logger().info('Publishing waypoint...')
         self.waypoint_publisher.publish(self.new_waypoint)
 
+        #Put a box arond the published point in the array of the already checked points
+        occupancy_data_np_checked=self.box_checked(occupancy_data_np_checked,random_index) 
+
         #Storing waypoint for comparison during next loop        
         self.old_point.point.x = self.new_waypoint.pose.position.x
         self.old_point.point.y = self.new_waypoint.pose.position.y
-
-        self.ready = False
-
-        #DEBUGGING CONDITIONAL AS ROBOT WAS GETTING STUCK DURING STARTUP, AND SELF.READY WOULD NEVER CHANGE BECAUSE THE BEHAVIORTREELOG TOPIC WAS NOT BEING PUBLISHED TO
-        if self.last_node_name == 'string':
-            self.ready = True
-
-        self.waiting_counter = 0
 
 
     def frontier_check(self, occupancy_data_np, random_index):
@@ -249,21 +207,31 @@ class Autopilot(Node):
         #TODO: Tune these values 
         for x in range(-4,5):
             for y in range(-4,5):
-                row_index = x * self.width + y
+                slider = x * self.width + y
                 try:
-                    if occupancy_data_np[random_index + row_index] == -1:
+                    if occupancy_data_np[random_index + slider] == -1:
                         uncertain_indexes += 1
-                    elif occupancy_data_np[random_index + row_index] > self.obstacle_probability:
+                    elif occupancy_data_np[random_index + slider] > self.obstacle_probability:
                         obstacle_indexes += 1
                 #the index of a point next to the random_index may not be within the range of occupancy_data.data, so the IndexError is handled below
                 except IndexError:
                     continue
         #Code to determine how many uncertain and obstacle indices need to be near our point
-        if uncertain_indexes > 1:# and 0 < obstacle_indexes:
+        if uncertain_indexes > 1 and 0 < obstacle_indexes:
             return True
         else:
             return False
         
+
+    def box_checked(self, occupancy_data_np_checked,new_waypoint_index):
+        """ The indexes of a box of 1.5m^2 around the new waypoint are added to the occupancy_data_np_checked,"""
+
+        for x in range(-1,1):
+            for y in range(-1,1):
+                slider= x * self.width + y
+                occupancy_data_np_checked = np.append(occupancy_data_np_checked, new_waypoint_index+slider)
+
+        return occupancy_data_np_checked
 
 
 
