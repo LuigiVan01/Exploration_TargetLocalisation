@@ -113,7 +113,7 @@ class Autopilot(Node):
 
         #TODO: Tune these values 
         min_distance = 1
-        max_distance = 5
+        max_distance = 3
 
         self.still_looking = False
         occupancy_data_np = np.array(self.current_grid.data)
@@ -217,17 +217,17 @@ class Autopilot(Node):
                 except IndexError:
                     continue
         #Code to determine how many uncertain and obstacle indices need to be near our point
-        if uncertain_indexes > 1 and 0 < obstacle_indexes:
+        if uncertain_indexes > 1: # and 0 < obstacle_indexes:
             return True
         else:
             return False
         
 
     def box_checked(self, occupancy_data_np_checked,new_waypoint_index):
-        """ The indexes of a box of 1.5m^2 around the new waypoint are added to the occupancy_data_np_checked,"""
+        """ The indexes of a box of 1m^2 around the new waypoint are added to the occupancy_data_np_checked,"""
 
-        for x in range(-1,1):
-            for y in range(-1,1):
+        for x in range(-9,10):
+            for y in range(-9,10):
                 slider= x * self.width + y
                 occupancy_data_np_checked = np.append(occupancy_data_np_checked, new_waypoint_index+slider)
 
