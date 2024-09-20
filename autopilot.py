@@ -30,7 +30,16 @@ class Autopilot(Node):
         #Initilizing the probablity at which we consider there to be an obstacle
         self.obstacle_probability = 60
 
+        # Flag variable that indicates that the exploration is just started
         self.start=True
+
+        # Array of indexes already checked
+        self.occupancy_data_np_checked = []
+
+        # Initialize the current, previous and difference grid
+        self.current_grid = OccupancyGrid()
+        self.previous_grid = OccupancyGrid()
+        self.difference_grid=OccupancyGrid()
 
         #Initializing x and y coordinates of Turtlebot in space, to be populated later
         self.new_waypoint = PoseStamped()
@@ -84,17 +93,19 @@ class Autopilot(Node):
     def store_grid(self,grid:OccupancyGrid):
         """ 
             Callback function of /map topic.
-            Everytime it receive te OccupacyGrid message it stores it. 
+            Everytime it receives the OccupacyGrid message it stores it, without wasting the previous one.
             At the start it launches the next_point() method since no message is received from the behavior_tree_log.
         """
+
+        self.previous_grid=self.current_grid
         self.current_grid=grid
         self.get_logger().info('Grid Received')
 
         if self.start:
-
             self.start=False
             self.next_waypoint()
-            
+
+
             
 
     def next_waypoint(self):
@@ -117,18 +128,21 @@ class Autopilot(Node):
 
         self.still_looking = False
         occupancy_data_np = np.array(self.current_grid.data)
-        occupancy_data_np_checked = []
     
         while isthisagoodwaypoint == False:
 
-            #Added this so that the terminal isn't filled with messages so it's easier to read
+            # Added this so that the terminal isn't filled with messages so it's easier to read
             if self.still_looking == False:
                 self.get_logger().info('Searching for good point...')
                 self.still_looking = True
 
+            #
+            #difference_grid_indexes = self.difference_grid_indexes(occupancy_data_np)
+
+
             # Taking a random cell 
             random_index = randrange(occupancy_data_np.size)
-            if random_index in occupancy_data_np_checked:
+            if random_index in self.occupancy_data_np_checked:
                 continue
 
             # Check that the cell is not unknown 
@@ -139,14 +153,14 @@ class Autopilot(Node):
             # Check that the cell is not an obstacle
             if self.potential_pos>= self.obstacle_probability:
                 self.get_logger().info('Point was an obstacle')
-                occupancy_data_np_checked = np.append(occupancy_data_np_checked, random_index)
+                occupancy_data_np_checked = np.append(self.occupancy_data_np_checked, random_index)
                 continue
             
             # Check that the point is on the frontier
             frontier_detection = self.frontier_check(occupancy_data_np, random_index)
             if frontier_detection==False:
                 self.get_logger().info('Point was not on frontier')
-                occupancy_data_np_checked = np.append(occupancy_data_np_checked, random_index)
+                occupancy_data_np_checked = np.append(self.occupancy_data_np_checked, random_index)
                 continue
 
             #CRITERIA FOR A 'GOOD' WAYPOINT  
@@ -189,7 +203,7 @@ class Autopilot(Node):
         self.waypoint_publisher.publish(self.new_waypoint)
 
         #Put a box arond the published point in the array of the already checked points
-        occupancy_data_np_checked=self.box_checked(occupancy_data_np_checked,random_index) 
+        self.occupancy_data_np_checked=self.box_checked(self.occupancy_data_np_checked,random_index)
 
         #Storing waypoint for comparison during next loop        
         self.old_point.point.x = self.new_waypoint.pose.position.x
@@ -221,10 +235,20 @@ class Autopilot(Node):
             return True
         else:
             return False
-        
+
+
+
+    def difference_grid_indexes(self, occupancy_data_np):
+        """ Compute the indexes of the cells that were unknown in the previous iteration and now are known """
+        difference_grid_indexes = []
+        for i in range(0, len(occupancy_data_np)):
+            if occupancy_data_np[i] != self.previous_grid.data[i] and self.previous_grid.data[i]==-1:
+                difference_grid_indexes=np.append(difference_grid_indexes, i)
+        return difference_grid_indexes
+
 
     def box_checked(self, occupancy_data_np_checked,new_waypoint_index):
-        """ The indexes of a box of 1m^2 around the new waypoint are added to the occupancy_data_np_checked,"""
+        """ The indexes of a box of 1m^2 around the new waypoint are added to the occupancy_data_np_checked"""
 
         for x in range(-9,10):
             for y in range(-9,10):
