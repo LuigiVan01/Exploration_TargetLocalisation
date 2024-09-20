@@ -31,6 +31,9 @@ class Autopilot(Node):
         #Initilizing the probablity at which we consider there to be an obstacle
         self.obstacle_probability = 90
 
+        # Specifies how many incoming messages should be buffered
+        self.queue_size = 10
+
         # Flag variable that indicates that the exploration is just started
         self.start=True
 
@@ -62,24 +65,53 @@ class Autopilot(Node):
 
 
         #Subscribe to /behavior_tree_log to determine when Turtlebot is ready for a new waypoint
-        self.behaviortreelogstate = self.create_subscription(BehaviorTreeLog, 'behavior_tree_log', self.readiness_check, 10, callback_group=self.parallel_callback_group)
+        self.behaviortreelogstate = self.create_subscription(
+            BehaviorTreeLog,
+            'behavior_tree_log',
+            self.readiness_check,
+            10,
+            callback_group=self.parallel_callback_group
+        )
 
         #Subscribe to OccupancyGrid type topic "/map"
         self.potential_pos = OccupancyGrid()
-        self.occupancy_grid = self.create_subscription(OccupancyGrid, '/global_costmap/costmap', self.store_grid, 10)
+        self.occupancy_grid = self.create_subscription(
+            OccupancyGrid,
+            '/global_costmap/costmap',
+            self.store_grid,
+            self.queue_size
+        )
 
         #Subscribe to /pose to determine position of Turtlebot
-        self.position_subscriber = self.create_subscription(PoseWithCovarianceStamped, '/pose', self.current_position_callback, 10, callback_group=self.parallel_callback_group)
+        self.position_subscriber = self.create_subscription(
+            PoseWithCovarianceStamped,
+            '/pose',
+            self.current_position_callback,
+            self.queue_size,
+            callback_group=self.parallel_callback_group
+        )
 
         
         #Create publisher to publish next waypoint parameters to
-        self.waypoint_publisher = self.create_publisher(PoseStamped, 'goal_pose', 10)
+        self.waypoint_publisher = self.create_publisher(
+            PoseStamped,
+            'goal_pose',
+            self.queue_size
+        )
 
         #Publisher for publishing potential waypoints to for bug fixing
-        self.potential_publisher = self.create_publisher(PointStamped, 'potential_point', 10)
+        self.potential_publisher = self.create_publisher(
+            PointStamped,
+            'potential_point',
+            self.queue_size
+        )
 
         #Publisher for publishing current coordinate for bug fixing
-        self.current_publisher = self.create_publisher(PointStamped, 'current_point', 10)
+        self.current_publisher = self.create_publisher(
+            PointStamped,
+            'current_point',
+            self.queue_size
+        )
 
 
         #Track number of waypoints  sent
@@ -112,9 +144,6 @@ class Autopilot(Node):
         self (Node): Autopilot node currently running and storing waypoint decisions 
         """
 
-        resolution = 0.05
-        origin_x = self.current_grid.info.origin.position.x
-        origin_y = self.current_grid.info.origin.position.y
         self.width = self.current_grid.info.width
         isthisagoodwaypoint = False
 
@@ -146,16 +175,7 @@ class Autopilot(Node):
             if self.potential_pos>= self.obstacle_probability:
                 self.get_logger().info('Point was an obstacle')
                 # Compute correspondent row and column of the potential cell
-                slider_float = random_index / self.width
-                slider = math.ceil(slider_float)
-                col_index = random_index % self.width
-
-                # Compute position with respect map frame of the potential cell
-                x_coord = (col_index*resolution) + origin_x
-                y_coord = (slider*resolution) + origin_y
-
-                self.potential_coordinate.point.x = x_coord
-                self.potential_coordinate.point.y = y_coord
+                [self.potential_coordinate.point.x, self.potential_coordinate.point.y] = self.cell_coordinates(random_index)
 
                 self.potential_publisher.publish(self.potential_coordinate)
                 self.get_logger().info(str(self.potential_pos))
@@ -175,28 +195,22 @@ class Autopilot(Node):
                 self.get_logger().info('Found Good Point')
 
                 # Compute correspondent row and column of the potential cell
-                slider_float = random_index / self.width
-                slider = math.ceil(slider_float)
-                col_index = random_index % self.width
-
-                # Compute position with respect map frame of the potential cell
-                x_coord = (col_index*resolution) + origin_x
-                y_coord = (slider*resolution) + origin_y
-
-                self.potential_coordinate.point.x = x_coord
-                self.potential_coordinate.point.y = y_coord
+                [self.potential_coordinate.point.x, self.potential_coordinate.point.y] = self.cell_coordinates(random_index)
 
                 self.potential_publisher.publish(self.potential_coordinate)
 
                 self.current_publisher.publish(self.current_position)
 
                 self.get_logger().info('Checking Point Distance')
-                distance2new = math.sqrt((x_coord - self.current_position.point.x)**2 + (y_coord - self.current_position.point.y)**2)
+                distance2new = math.sqrt(
+                    (self.potential_coordinate.point.x - self.current_position.point.x)**2 +
+                    (self.potential_coordinate.point.y- self.current_position.point.y)**2
+                )
 
 
                 if min_distance < distance2new < max_distance:
-                    self.new_waypoint.pose.position.x = x_coord
-                    self.new_waypoint.pose.position.y = y_coord
+                    self.new_waypoint.pose.position.x = self.potential_coordinate.point.x
+                    self.new_waypoint.pose.position.y = self.potential_coordinate.point.y
                     self.get_logger().info('Point Distance:')
                     self.get_logger().info(str(distance2new))
                     isthisagoodwaypoint = True
@@ -244,7 +258,7 @@ class Autopilot(Node):
         
 
     def box_checked(self, occupancy_data_np_checked,new_waypoint_index):
-        """ The indexes of a box of 1m^2 around the new waypoint are added to the occupancy_data_np_checked,"""
+        """ The indexes of a box around the new waypoint are added to the occupancy_data_np_checked,"""
 
         for x in range(-9,10):
             for y in range(-9,10):
@@ -253,7 +267,25 @@ class Autopilot(Node):
 
         return occupancy_data_np_checked
 
+    def cell_coordinates(self,index):
+        """
+        Given an index of a cell in the occupancy grid, it returns the coordinates of the cell in the map frame.
+        """
+        resolution = 0.05
+        origin_x = self.current_grid.info.origin.position.x
+        origin_y = self.current_grid.info.origin.position.y
+        width = self.current_grid.info.width
 
+        # Compute correspondent row and column of the potential cell
+        slider_float = index / width
+        slider = math.ceil(slider_float)
+        col_index = index % width
+
+        # Compute position with respect map frame of the potential cell
+        x_coord = (col_index*resolution) + origin_x
+        y_coord = (slider*resolution) + origin_y
+
+        return x_coord, y_coord
 
     def current_position_callback(self, msg:PoseWithCovarianceStamped):
         #Return current robot pose, unless searching_for_waypoint
