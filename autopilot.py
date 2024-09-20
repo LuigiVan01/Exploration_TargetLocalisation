@@ -1,6 +1,7 @@
 import numpy as np
 import rclpy
 import math
+import time
 from random import randrange
 from rclpy.node import Node
 from rclpy.executors import MultiThreadedExecutor
@@ -28,7 +29,7 @@ class Autopilot(Node):
         self.parallel_callback_group = ReentrantCallbackGroup()
 
         #Initilizing the probablity at which we consider there to be an obstacle
-        self.obstacle_probability = 60
+        self.obstacle_probability = 90
 
         # Flag variable that indicates that the exploration is just started
         self.start=True
@@ -58,11 +59,6 @@ class Autopilot(Node):
         self.current_position = PointStamped()
         self.current_position.header.frame_id = 'map'
 
-        #Initializing old waypoint variable
-        self.old_point = PointStamped()
-        self.old_point.header.frame_id = 'map'
-        self.old_point.point.x = float('inf')
-        self.old_point.point.y = float('inf')
 
 
         #Subscribe to /behavior_tree_log to determine when Turtlebot is ready for a new waypoint
@@ -70,7 +66,7 @@ class Autopilot(Node):
 
         #Subscribe to OccupancyGrid type topic "/map"
         self.potential_pos = OccupancyGrid()
-        self.occupancy_grid = self.create_subscription(OccupancyGrid, '/map', self.store_grid, 10)
+        self.occupancy_grid = self.create_subscription(OccupancyGrid, '/global_costmap/costmap', self.store_grid, 10)
 
         #Subscribe to /pose to determine position of Turtlebot
         self.position_subscriber = self.create_subscription(PoseWithCovarianceStamped, '/pose', self.current_position_callback, 10, callback_group=self.parallel_callback_group)
@@ -89,7 +85,8 @@ class Autopilot(Node):
         #Track number of waypoints  sent
         self.waypoint_counter = 0.0
 
-
+    
+    
     def store_grid(self,grid:OccupancyGrid):
         """ 
             Callback function of /map topic.
@@ -104,8 +101,7 @@ class Autopilot(Node):
         if self.start:
             self.start=False
             self.next_waypoint()
-
-
+            
             
 
     def next_waypoint(self):
@@ -131,14 +127,10 @@ class Autopilot(Node):
     
         while isthisagoodwaypoint == False:
 
-            # Added this so that the terminal isn't filled with messages so it's easier to read
+            #Added this so that the terminal isn't filled with messages so it's easier to read
             if self.still_looking == False:
                 self.get_logger().info('Searching for good point...')
                 self.still_looking = True
-
-            #
-            #difference_grid_indexes = self.difference_grid_indexes(occupancy_data_np)
-
 
             # Taking a random cell 
             random_index = randrange(occupancy_data_np.size)
@@ -153,18 +145,33 @@ class Autopilot(Node):
             # Check that the cell is not an obstacle
             if self.potential_pos>= self.obstacle_probability:
                 self.get_logger().info('Point was an obstacle')
-                occupancy_data_np_checked = np.append(self.occupancy_data_np_checked, random_index)
+                # Compute correspondent row and column of the potential cell
+                slider_float = random_index / self.width
+                slider = math.ceil(slider_float)
+                col_index = random_index % self.width
+
+                # Compute position with respect map frame of the potential cell
+                x_coord = (col_index*resolution) + origin_x
+                y_coord = (slider*resolution) + origin_y
+
+                self.potential_coordinate.point.x = x_coord
+                self.potential_coordinate.point.y = y_coord
+
+                self.potential_publisher.publish(self.potential_coordinate)
+                self.get_logger().info(str(self.potential_pos))
+                #time.sleep(3)
+                self.occupancy_data_np_checked = np.append(self.occupancy_data_np_checked, random_index)
                 continue
             
             # Check that the point is on the frontier
             frontier_detection = self.frontier_check(occupancy_data_np, random_index)
             if frontier_detection==False:
                 self.get_logger().info('Point was not on frontier')
-                occupancy_data_np_checked = np.append(self.occupancy_data_np_checked, random_index)
+                self.occupancy_data_np_checked = np.append(self.occupancy_data_np_checked, random_index)
                 continue
 
             #CRITERIA FOR A 'GOOD' WAYPOINT  
-            if  self.potential_pos <= 20 :
+            if  self.potential_pos <= self.obstacle_probability:
                 self.get_logger().info('Found Good Point')
 
                 # Compute correspondent row and column of the potential cell
@@ -199,15 +206,14 @@ class Autopilot(Node):
                     isthisagoodwaypoint = False
                     self.still_looking = False
 
+
+        #Publish the new waypoint
         self.get_logger().info('Publishing waypoint...')
         self.waypoint_publisher.publish(self.new_waypoint)
 
         #Put a box arond the published point in the array of the already checked points
-        self.occupancy_data_np_checked=self.box_checked(self.occupancy_data_np_checked,random_index)
+        self.occupancy_data_np_checked=self.box_checked(self.occupancy_data_np_checked,random_index) 
 
-        #Storing waypoint for comparison during next loop        
-        self.old_point.point.x = self.new_waypoint.pose.position.x
-        self.old_point.point.y = self.new_waypoint.pose.position.y
 
 
     def frontier_check(self, occupancy_data_np, random_index):
@@ -215,12 +221,12 @@ class Autopilot(Node):
         Checks if the point we've selected is on the edge of the frontier, but isn't very close to obstacles
         """
         uncertain_indexes = 0
-        obstacle_indexes = 0
+        obstacle_indexes  = 0
 
         #Inspects the nature of points in a grid around the selected point
         #TODO: Tune these values 
-        for x in range(-4,5):
-            for y in range(-4,5):
+        for x in range(-18,20):
+            for y in range(-18,20):
                 slider = x * self.width + y
                 try:
                     if occupancy_data_np[random_index + slider] == -1:
@@ -235,20 +241,10 @@ class Autopilot(Node):
             return True
         else:
             return False
-
-
-
-    def difference_grid_indexes(self, occupancy_data_np):
-        """ Compute the indexes of the cells that were unknown in the previous iteration and now are known """
-        difference_grid_indexes = []
-        for i in range(0, len(occupancy_data_np)):
-            if occupancy_data_np[i] != self.previous_grid.data[i] and self.previous_grid.data[i]==-1:
-                difference_grid_indexes=np.append(difference_grid_indexes, i)
-        return difference_grid_indexes
-
+        
 
     def box_checked(self, occupancy_data_np_checked,new_waypoint_index):
-        """ The indexes of a box of 1m^2 around the new waypoint are added to the occupancy_data_np_checked"""
+        """ The indexes of a box of 1m^2 around the new waypoint are added to the occupancy_data_np_checked,"""
 
         for x in range(-9,10):
             for y in range(-9,10):
@@ -267,7 +263,13 @@ class Autopilot(Node):
         #if self.searching_for_waypoint == False:
             
 
-
+    def difference_grid_indexes(self, occupancy_data_np):
+        """ Compute the indexes of the cells that were unknown in the previous iteration and now are known """
+        difference_grid_indexes = []
+        for i in range(0, len(occupancy_data_np)):
+            if occupancy_data_np[i] != self.previous_grid.data[i] and self.previous_grid.data[i]==-1:
+                difference_grid_indexes=np.append(difference_grid_indexes, i)
+        return difference_grid_indexes
 
 
     def readiness_check(self, msg:BehaviorTreeLog):
@@ -321,6 +323,7 @@ def main():
     autopilot_node = Autopilot()
     executor = MultiThreadedExecutor(num_threads=3)
     executor.add_node(autopilot_node)
+    autopilot_node.get_logger().info('Running autopilot node')
     executor.spin()
     autopilot_node.destroy_node()
     rclpy.shutdown()
