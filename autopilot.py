@@ -227,9 +227,12 @@ class Autopilot(Node):
 
         #New strategy
         if self.strategy_counter == 0:
-            self.new_strategy(occupancy_data_np)
             self.strategy_counter = 15
-        
+            array= self.new_strategy(occupancy_data_np)
+            [self.new_waypoint.pose.position.x,self.new_waypoint.pose.position.y]= self.cell_coordinates(array[0])
+
+
+
         #Publish the new waypoint
         self.get_logger().info('Publishing waypoint...')
         self.waypoint_publisher.publish(self.new_waypoint)
@@ -249,14 +252,24 @@ class Autopilot(Node):
         counts_list = []
 
         # Iterate over all cells in the occupancy grid
-        for index in range(len(occupancy_data_np)):
+        for index in range(len(occupancy_data_np)) :
+
+            if index not in self.occupancy_data_np_checked:
+                continue
+
+            if occupancy_data_np[index] != -1:
+                continue
+
+            if occupancy_data_np[index] > self.obstacle_probability:
+                self.occupancy_data_np_checked = np.append(self.occupancy_data_np_checked, index)
+                continue
+
             uncertain_count = self.count_uncertain_cells_around(index, occupancy_data_np, width, height)
             counts_list.append((index, uncertain_count))
 
         # Sort the list by uncertain_count in descending order
         sorted_counts = sorted(counts_list, key=lambda x: x[1], reverse=True)
-
-
+        return sorted_counts
 
 
     def count_uncertain_cells_around(self, index, occupancy_data_np, width, height):
