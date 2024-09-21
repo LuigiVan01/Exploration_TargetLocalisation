@@ -195,45 +195,41 @@ class Autopilot(Node):
                 continue
 
             #CRITERIA FOR A 'GOOD' WAYPOINT  
-            if  self.potential_pos <= self.obstacle_probability:
-                self.get_logger().info('Found Good Point')
+            
+            self.get_logger().info('Found Good Point')
 
-                # Compute correspondent row and column of the potential cell
-                [self.potential_coordinate.point.x, self.potential_coordinate.point.y] = self.cell_coordinates(random_index)
+            # Compute correspondent row and column of the potential cell
+            [self.potential_coordinate.point.x, self.potential_coordinate.point.y] = self.cell_coordinates(random_index)
 
-                self.potential_publisher.publish(self.potential_coordinate)
+            self.potential_publisher.publish(self.potential_coordinate)
 
-                self.current_publisher.publish(self.current_position)
+            self.current_publisher.publish(self.current_position)
 
-                self.get_logger().info('Checking Point Distance')
-                distance2new = math.sqrt(
-                    (self.potential_coordinate.point.x - self.current_position.point.x)**2 +
-                    (self.potential_coordinate.point.y- self.current_position.point.y)**2
-                )
+            self.get_logger().info('Checking Point Distance')
+            distance2new = math.sqrt(
+                (self.potential_coordinate.point.x - self.current_position.point.x)**2 +
+                (self.potential_coordinate.point.y- self.current_position.point.y)**2
+            )
 
 
-                if min_distance < distance2new < max_distance:
-                    self.new_waypoint.pose.position.x = self.potential_coordinate.point.x
-                    self.new_waypoint.pose.position.y = self.potential_coordinate.point.y
-                    self.get_logger().info('Point Distance:')
-                    self.get_logger().info(str(distance2new))
-                    isthisagoodwaypoint = True
-                    self.strategy_counter -= 1
+            if min_distance < distance2new < max_distance:
+                self.new_waypoint.pose.position.x = self.potential_coordinate.point.x
+                self.new_waypoint.pose.position.y = self.potential_coordinate.point.y
+                self.get_logger().info('Point Distance:')
+                self.get_logger().info(str(distance2new))
+                isthisagoodwaypoint = True
+                self.strategy_counter -= 1
 
-                else:
-                    self.get_logger().info('Point not in range, Finding New...')
-                    isthisagoodwaypoint = False
-                    self.still_looking = False
+            else:
+                self.get_logger().info('Point not in range, Finding New...')
+                isthisagoodwaypoint = False
+                self.still_looking = False
 
         #New strategy
         if self.strategy_counter == 0:
             self.new_strategy(occupancy_data_np)
             self.strategy_counter = 15
         
-
-
-              
-
         #Publish the new waypoint
         self.get_logger().info('Publishing waypoint...')
         self.waypoint_publisher.publish(self.new_waypoint)
@@ -260,13 +256,8 @@ class Autopilot(Node):
         # Sort the list by uncertain_count in descending order
         sorted_counts = sorted(counts_list, key=lambda x: x[1], reverse=True)
 
-        # You can now use the sorted_counts list for further processing or debugging
-        # For example, print the top 10 cells with the highest counts
-        self.get_logger().info('Top 10 cells with highest number of uncertain neighbors:')
-        for i in range(10):
-            index, count = sorted_counts[i]
-            x_coord, y_coord = self.cell_coordinates(index)
-            self.get_logger().info(f'Index: {index}, Count: {count}, Coordinates: ({x_coord}, {y_coord})')
+
+
 
     def count_uncertain_cells_around(self, index, occupancy_data_np, width, height):
         """Counts the number of uncertain cells (-1) around a given cell within a defined box size."""
