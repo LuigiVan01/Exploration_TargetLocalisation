@@ -229,7 +229,7 @@ class Autopilot(Node):
         if self.strategy_counter == 0:
             self.strategy_counter = 15
             array= self.new_strategy(occupancy_data_np)
-            [self.new_waypoint.pose.position.x,self.new_waypoint.pose.position.y]= self.cell_coordinates(array[0])
+            [self.new_waypoint.pose.position.x,self.new_waypoint.pose.position.y]= self.cell_coordinates(array[0][0])
 
 
 
