@@ -66,7 +66,7 @@ class Autopilot(Node):
         self.current_position.header.frame_id = 'map'
 
         #Initializing number of iterations before the strategy is changed
-        self.strategy_counter = 40
+        self.strategy_counter = 1
 
         #Subscribe to /behavior_tree_log to determine when Turtlebot is ready for a new waypoint
         self.behaviortreelogstate = self.create_subscription(
@@ -195,40 +195,43 @@ class Autopilot(Node):
                 continue
 
             #CRITERIA FOR A 'GOOD' WAYPOINT  
-            
-            self.get_logger().info('Found Good Point')
+            if  self.potential_pos <= self.obstacle_probability:
+                self.get_logger().info('Found Good Point')
 
-            # Compute correspondent row and column of the potential cell
-            [self.potential_coordinate.point.x, self.potential_coordinate.point.y] = self.cell_coordinates(random_index)
+                # Compute correspondent row and column of the potential cell
+                [self.potential_coordinate.point.x, self.potential_coordinate.point.y] = self.cell_coordinates(random_index)
 
-            self.potential_publisher.publish(self.potential_coordinate)
+                self.potential_publisher.publish(self.potential_coordinate)
 
-            self.current_publisher.publish(self.current_position)
+                self.current_publisher.publish(self.current_position)
 
-            self.get_logger().info('Checking Point Distance')
-            distance2new = math.sqrt(
-                (self.potential_coordinate.point.x - self.current_position.point.x)**2 +
-                (self.potential_coordinate.point.y- self.current_position.point.y)**2
-            )
+                self.get_logger().info('Checking Point Distance')
+                distance2new = math.sqrt(
+                    (self.potential_coordinate.point.x - self.current_position.point.x)**2 +
+                    (self.potential_coordinate.point.y- self.current_position.point.y)**2
+                )
 
 
-            if min_distance < distance2new < max_distance:
-                self.new_waypoint.pose.position.x = self.potential_coordinate.point.x
-                self.new_waypoint.pose.position.y = self.potential_coordinate.point.y
-                self.get_logger().info('Point Distance:')
-                self.get_logger().info(str(distance2new))
-                isthisagoodwaypoint = True
-                self.strategy_counter -= 1
+                if min_distance < distance2new < max_distance:
+                    self.new_waypoint.pose.position.x = self.potential_coordinate.point.x
+                    self.new_waypoint.pose.position.y = self.potential_coordinate.point.y
+                    self.get_logger().info('Point Distance:')
+                    self.get_logger().info(str(distance2new))
+                    isthisagoodwaypoint = True
+                    #Put a box arond the published point in the array of the already checked points
+                    self.occupancy_data_np_checked=self.box_checked(self.occupancy_data_np_checked,random_index) 
+                    self.strategy_counter -= 1
+                    self.get_logger().info(str(self.strategy_counter))
 
-            else:
-                self.get_logger().info('Point not in range, Finding New...')
-                isthisagoodwaypoint = False
-                self.still_looking = False
+                else:
+                    self.get_logger().info('Point not in range, Finding New...')
+                    isthisagoodwaypoint = False
+                    self.still_looking = False
 
         #New strategy
         if self.strategy_counter == 0:
-            self.strategy_counter = 15
-            array= self.new_strategy(occupancy_data_np)
+            self.strategy_counter = 5
+            array = self.new_strategy()
             [self.new_waypoint.pose.position.x,self.new_waypoint.pose.position.y]= self.cell_coordinates(array[0][0])
 
 
@@ -237,8 +240,8 @@ class Autopilot(Node):
         self.get_logger().info('Publishing waypoint...')
         self.waypoint_publisher.publish(self.new_waypoint)
 
-        #Put a box arond the published point in the array of the already checked points
-        self.occupancy_data_np_checked=self.box_checked(self.occupancy_data_np_checked,random_index) 
+        
+        
 
     
 
@@ -254,10 +257,10 @@ class Autopilot(Node):
         # Iterate over all cells in the occupancy grid
         for index in range(len(occupancy_data_np)) :
 
-            if index not in self.occupancy_data_np_checked:
+            if index in self.occupancy_data_np_checked:
                 continue
 
-            if occupancy_data_np[index] != -1:
+            if occupancy_data_np[index] == -1:
                 continue
 
             if occupancy_data_np[index] > self.obstacle_probability:
@@ -269,6 +272,7 @@ class Autopilot(Node):
 
         # Sort the list by uncertain_count in descending order
         sorted_counts = sorted(counts_list, key=lambda x: x[1], reverse=True)
+        self.get_logger().info(str(sorted_counts))
         return sorted_counts
 
 
@@ -277,20 +281,16 @@ class Autopilot(Node):
         uncertain_count = 0
         box_size = 5  # Define the size of the box around each cell
 
-        # Convert index to row and column
-        row = index // width
-        col = index % width
-
         # Loop over the box around the cell
-        for dr in range(-box_size, box_size + 1):
-            for dc in range(-box_size, box_size + 1):
-                r = row + dr
-                c = col + dc
-                # Check if r and c are within bounds
-                if 0 <= r < height and 0 <= c < width:
-                    neighbor_index = r * width + c
-                    if occupancy_data_np[neighbor_index] == -1:
+        for x in range(-box_size, box_size + 1):
+            for y in range(-box_size, box_size + 1):
+                slider = x * self.width + y
+                try:
+                    if occupancy_data_np[index + slider] == -1:
                         uncertain_count += 1
+                #the index of a point next to the random_index may not be within the range of occupancy_data.data, so the IndexError is handled below
+                except IndexError:
+                    continue
         return uncertain_count
            
 
