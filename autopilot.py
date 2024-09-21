@@ -37,6 +37,9 @@ class Autopilot(Node):
         # Flag variable that indicates that the exploration is just started
         self.start=True
 
+        # Initialize the the number of waypoints published
+        self.waypoint_counter = 0
+
         # Array of indexes already checked
         self.occupancy_data_np_checked = []
 
@@ -62,7 +65,8 @@ class Autopilot(Node):
         self.current_position = PointStamped()
         self.current_position.header.frame_id = 'map'
 
-
+        #Initializing number of iterations before the strategy is changed
+        self.strategy_counter = 40
 
         #Subscribe to /behavior_tree_log to determine when Turtlebot is ready for a new waypoint
         self.behaviortreelogstate = self.create_subscription(
@@ -154,7 +158,7 @@ class Autopilot(Node):
         self.still_looking = False
         occupancy_data_np = np.array(self.current_grid.data)
     
-        while isthisagoodwaypoint == False:
+        while isthisagoodwaypoint == False and self.strategy_counter > 0:
 
             #Added this so that the terminal isn't filled with messages so it's easier to read
             if self.still_looking == False:
@@ -214,12 +218,21 @@ class Autopilot(Node):
                     self.get_logger().info('Point Distance:')
                     self.get_logger().info(str(distance2new))
                     isthisagoodwaypoint = True
+                    self.strategy_counter -= 1
 
                 else:
                     self.get_logger().info('Point not in range, Finding New...')
                     isthisagoodwaypoint = False
                     self.still_looking = False
 
+        #New strategy
+        if self.strategy_counter == 0:
+            self.new_strategy(occupancy_data_np)
+            self.strategy_counter = 15
+        
+
+
+              
 
         #Publish the new waypoint
         self.get_logger().info('Publishing waypoint...')
@@ -228,7 +241,54 @@ class Autopilot(Node):
         #Put a box arond the published point in the array of the already checked points
         self.occupancy_data_np_checked=self.box_checked(self.occupancy_data_np_checked,random_index) 
 
+    
 
+    def new_strategy(self):
+        """Processes the occupancy grid and creates a sorted list of cells based on the number of uncertain cells around them."""
+
+        self.get_logger().info('Processing occupancy grid after 40 waypoints...')
+        occupancy_data_np = np.array(self.current_grid.data)
+        width = self.current_grid.info.width
+        height = self.current_grid.info.height
+        counts_list = []
+
+        # Iterate over all cells in the occupancy grid
+        for index in range(len(occupancy_data_np)):
+            uncertain_count = self.count_uncertain_cells_around(index, occupancy_data_np, width, height)
+            counts_list.append((index, uncertain_count))
+
+        # Sort the list by uncertain_count in descending order
+        sorted_counts = sorted(counts_list, key=lambda x: x[1], reverse=True)
+
+        # You can now use the sorted_counts list for further processing or debugging
+        # For example, print the top 10 cells with the highest counts
+        self.get_logger().info('Top 10 cells with highest number of uncertain neighbors:')
+        for i in range(10):
+            index, count = sorted_counts[i]
+            x_coord, y_coord = self.cell_coordinates(index)
+            self.get_logger().info(f'Index: {index}, Count: {count}, Coordinates: ({x_coord}, {y_coord})')
+
+    def count_uncertain_cells_around(self, index, occupancy_data_np, width, height):
+        """Counts the number of uncertain cells (-1) around a given cell within a defined box size."""
+        uncertain_count = 0
+        box_size = 5  # Define the size of the box around each cell
+
+        # Convert index to row and column
+        row = index // width
+        col = index % width
+
+        # Loop over the box around the cell
+        for dr in range(-box_size, box_size + 1):
+            for dc in range(-box_size, box_size + 1):
+                r = row + dr
+                c = col + dc
+                # Check if r and c are within bounds
+                if 0 <= r < height and 0 <= c < width:
+                    neighbor_index = r * width + c
+                    if occupancy_data_np[neighbor_index] == -1:
+                        uncertain_count += 1
+        return uncertain_count
+           
 
     def frontier_check(self, occupancy_data_np, random_index):
         """
