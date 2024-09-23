@@ -25,10 +25,10 @@ class Autopilot(Node):
         occupancy_grid (OccupancyGrid): Current occupancy grid information received from '/map'. References callback function 'next_waypoint'
         
         """
-        #Allow callback functions to be called in parallel
+        # Allow callback functions to be called in parallel
         self.parallel_callback_group = ReentrantCallbackGroup()
 
-        #Initilizing the probablity at which we consider there to be an obstacle
+        # Initilizing the probablity at which we consider there to be an obstacle
         self.obstacle_probability = 90
 
         # Specifies how many incoming messages should be buffered
@@ -48,14 +48,14 @@ class Autopilot(Node):
         self.previous_grid = OccupancyGrid()
         self.difference_grid=OccupancyGrid()
 
-        #Initializing x and y coordinates of Turtlebot in space, to be populated later
+        # Initializing x and y coordinates of Turtlebot in space, to be populated later
         self.new_waypoint = PoseStamped()
         self.new_waypoint.header.frame_id = 'map'
         self.new_waypoint.pose.position.x = 0.0
         self.new_waypoint.pose.position.y = 0.0
         self.new_waypoint.pose.orientation.w = 1.0
 
-        #Initializing potential_coordinate for debugging
+        # Initializing potential_coordinate for debugging
         self.potential_coordinate = PointStamped()
         self.potential_coordinate.header.frame_id = 'map'
         self.potential_coordinate.point.x = 0.0
@@ -66,14 +66,14 @@ class Autopilot(Node):
         self.current_position.header.frame_id = 'map'
 
         #Initializing number of iterations before the strategy is changed
-        self.strategy_counter = 1
+        self.strategy_counter = 20
 
         #Subscribe to /behavior_tree_log to determine when Turtlebot is ready for a new waypoint
         self.behaviortreelogstate = self.create_subscription(
             BehaviorTreeLog,
             'behavior_tree_log',
             self.readiness_check,
-            10,
+            self.queue_size,
             callback_group=self.parallel_callback_group
         )
 
@@ -155,57 +155,52 @@ class Autopilot(Node):
         min_distance = 1
         max_distance = 3
 
-        self.still_looking = False
+        still_looking = False
         occupancy_data_np = np.array(self.current_grid.data)
     
         while isthisagoodwaypoint == False and self.strategy_counter > 0:
 
-            #Added this so that the terminal isn't filled with messages so it's easier to read
-            if self.still_looking == False:
+            # Added this so that the terminal isn't filled with messages so it's easier to read
+            if still_looking == False:
                 self.get_logger().info('Searching for good point...')
-                self.still_looking = True
+                still_looking = True
 
-            # Taking a random cell 
+            # Taking a random cell and the corresponding cost value
             random_index = randrange(occupancy_data_np.size)
-            if random_index in self.occupancy_data_np_checked:
+            self.potential_pos = occupancy_data_np[random_index]
+
+            # Check that the cell has not been checked before or is unknown
+            if random_index in self.occupancy_data_np_checked or self.potential_pos == -1:
                 continue
 
-            # Check that the cell is not unknown 
-            self.potential_pos = occupancy_data_np[random_index]
-            if self.potential_pos==-1:
-                continue
+            # Compute correspondent row and column of the potential cell 
+            [self.potential_coordinate.point.x, self.potential_coordinate.point.y] = self.cell_coordinates(random_index)
+            
+            # Publish current position and potential position for visualization
+            self.potential_publisher.publish(self.potential_coordinate)
+            self.current_publisher.publish(self.current_position)
 
             # Check that the cell is not an obstacle
             if self.potential_pos>= self.obstacle_probability:
-                self.get_logger().info('Point was an obstacle')
-                # Compute correspondent row and column of the potential cell
-                [self.potential_coordinate.point.x, self.potential_coordinate.point.y] = self.cell_coordinates(random_index)
-
-                self.potential_publisher.publish(self.potential_coordinate)
-                self.get_logger().info(str(self.potential_pos))
+                
+                self.get_logger().info('Point was an obstacle with cost:' + str(self.potential_pos))
                 #time.sleep(3)
+
                 self.occupancy_data_np_checked = np.append(self.occupancy_data_np_checked, random_index)
                 continue
             
             # Check that the point is on the frontier
-            frontier_detection = self.frontier_check(occupancy_data_np, random_index)
-            if frontier_detection==False:
+            elif not self.frontier_check(occupancy_data_np, random_index):
+
                 self.get_logger().info('Point was not on frontier')
+
                 self.occupancy_data_np_checked = np.append(self.occupancy_data_np_checked, random_index)
                 continue
-
-            #CRITERIA FOR A 'GOOD' WAYPOINT  
-            if  self.potential_pos <= self.obstacle_probability:
+  
+            else:
                 self.get_logger().info('Found Good Point')
-
-                # Compute correspondent row and column of the potential cell
-                [self.potential_coordinate.point.x, self.potential_coordinate.point.y] = self.cell_coordinates(random_index)
-
-                self.potential_publisher.publish(self.potential_coordinate)
-
-                self.current_publisher.publish(self.current_position)
-
                 self.get_logger().info('Checking Point Distance')
+
                 distance2new = math.sqrt(
                     (self.potential_coordinate.point.x - self.current_position.point.x)**2 +
                     (self.potential_coordinate.point.y- self.current_position.point.y)**2
@@ -215,24 +210,26 @@ class Autopilot(Node):
                 if min_distance < distance2new < max_distance:
                     self.new_waypoint.pose.position.x = self.potential_coordinate.point.x
                     self.new_waypoint.pose.position.y = self.potential_coordinate.point.y
-                    self.get_logger().info('Point Distance:')
-                    self.get_logger().info(str(distance2new))
+                    self.get_logger().info('Point Distance:' + str(distance2new))
+            
                     isthisagoodwaypoint = True
+
                     #Put a box arond the published point in the array of the already checked points
-                    self.occupancy_data_np_checked=self.box_checked(self.occupancy_data_np_checked,random_index) 
+                    self.box_checked(random_index) 
                     self.strategy_counter -= 1
-                    self.get_logger().info(str(self.strategy_counter))
+                    self.get_logger().info("Remainig points beofre new strategy:" + str(self.strategy_counter))
 
                 else:
                     self.get_logger().info('Point not in range, Finding New...')
                     isthisagoodwaypoint = False
-                    self.still_looking = False
+                    still_looking = False
 
         #New strategy
         if self.strategy_counter == 0:
             self.strategy_counter = 5
             array = self.new_strategy()
             [self.new_waypoint.pose.position.x,self.new_waypoint.pose.position.y]= self.cell_coordinates(array[0][0])
+            self.box_checked(array[0][0])
 
 
 
@@ -257,22 +254,22 @@ class Autopilot(Node):
         # Iterate over all cells in the occupancy grid
         for index in range(len(occupancy_data_np)) :
 
-            if index in self.occupancy_data_np_checked:
+            if index in self.occupancy_data_np_checked or occupancy_data_np[index] == -1:
                 continue
 
-            if occupancy_data_np[index] == -1:
-                continue
 
-            if occupancy_data_np[index] > self.obstacle_probability:
+            elif occupancy_data_np[index] >= self.obstacle_probability:
                 self.occupancy_data_np_checked = np.append(self.occupancy_data_np_checked, index)
                 continue
 
-            uncertain_count = self.count_uncertain_cells_around(index, occupancy_data_np, width, height)
-            counts_list.append((index, uncertain_count))
+            else: 
+                # Count the number of uncertain cells around the current cell and append to the list
+                uncertain_count = self.count_uncertain_cells_around(index, occupancy_data_np, width, height)
+                counts_list.append((index, uncertain_count))
 
         # Sort the list by uncertain_count in descending order
         sorted_counts = sorted(counts_list, key=lambda x: x[1], reverse=True)
-        self.get_logger().info(str(sorted_counts))
+        #self.get_logger().info(str(sorted_counts))
         return sorted_counts
 
 
@@ -321,15 +318,14 @@ class Autopilot(Node):
             return False
         
 
-    def box_checked(self, occupancy_data_np_checked,new_waypoint_index):
-        """ The indexes of a box around the new waypoint are added to the occupancy_data_np_checked,"""
+    def box_checked(self,new_waypoint_index):
+        """ The indexes of a 1m^2 box around the new waypoint are added to the occupancy_data_np_checked"""
 
         for x in range(-9,10):
             for y in range(-9,10):
                 slider= x * self.width + y
-                occupancy_data_np_checked = np.append(occupancy_data_np_checked, new_waypoint_index+slider)
+                self.occupancy_data_np_checked = np.append(self.occupancy_data_np_checked, new_waypoint_index+slider)
 
-        return occupancy_data_np_checked
 
     def cell_coordinates(self,index):
         """
@@ -385,30 +381,7 @@ class Autopilot(Node):
 
             elif event.node_name == 'GoalUpdated' and event.current_status == "FAILURE":
                 self.next_waypoint()
-        '''
-            if event.node_name == 'IsGoalReached' and event.current_status =='SUCCESS':
-                self.ready = True
-                #self.next_waypoint(occupancy_data=self.occupancy_grid)
-
-            #elif event.node_name == 'RateController' and event.current_status == 'RUNNING':
-            #    self.ready = False
-            
-            elif event.node_name == 'FollowPath' and event.current_status =='SUCCESS':
-                self.ready = True
-
-            elif event.node_name == 'ComputePathToPose' and event.current_status == "FAILURE":
-                self.ready = True
-
-            
-            else:
-                #self.get_logger().info('Event Node Name:')
-                #self.get_logger().info(event.node_name)
-                self.last_node_name = event.node_name
-                #self.get_logger().info('Event Node Status:')
-                #self.get_logger().info(event.current_status)
-                self.last_node_status = event.current_status
-                return
-                '''
+      
             
     
 
