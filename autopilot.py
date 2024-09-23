@@ -351,13 +351,13 @@ class Autopilot(Node):
         width = self.current_grid.info.width
 
         # Compute correspondent row and column of the potential cell
-        slider_float = index / width
-        slider = math.ceil(slider_float)
+        row_index_float = index / width
+        row_index = math.ceil(row_index_float)
         col_index = index % width
 
         # Compute position with respect map frame of the potential cell
         x_coord = (col_index*resolution) + origin_x
-        y_coord = (slider*resolution)    + origin_y
+        y_coord = (row_index*resolution)    + origin_y
 
         return x_coord, y_coord
 
