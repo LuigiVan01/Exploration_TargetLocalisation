@@ -66,7 +66,7 @@ class Autopilot(Node):
         self.current_position.header.frame_id = 'map'
 
         #Initializing number of iterations before the strategy is changed
-        self.strategy_counter = 20
+        self.strategy_counter = 10
 
         #Subscribe to /behavior_tree_log to determine when Turtlebot is ready for a new waypoint
         self.behaviortreelogstate = self.create_subscription(
@@ -151,85 +151,95 @@ class Autopilot(Node):
         self.width = self.current_grid.info.width
         isthisagoodwaypoint = False
 
-        #TODO: Tune these values 
+        not_in_range_count=0
+        
         min_distance = 1
         max_distance = 3
 
         still_looking = False
         occupancy_data_np = np.array(self.current_grid.data)
-    
-        while isthisagoodwaypoint == False and self.strategy_counter > 0:
 
-            # Added this so that the terminal isn't filled with messages so it's easier to read
-            if still_looking == False:
-                self.get_logger().info('Searching for good point...')
-                still_looking = True
+        if self.strategy_counter > 0:
 
-            # Taking a random cell and the corresponding cost value
-            random_index = randrange(occupancy_data_np.size)
-            self.potential_pos = occupancy_data_np[random_index]
+            while isthisagoodwaypoint == False:
 
-            # Check that the cell has not been checked before or is unknown
-            if random_index in self.occupancy_data_np_checked or self.potential_pos == -1:
-                continue
+                # Added this so that the terminal isn't filled with messages so it's easier to read
+                if still_looking == False:
+                    self.get_logger().info('Searching for good point...')
+                    still_looking = True
 
-            # Compute correspondent row and column of the potential cell 
-            [self.potential_coordinate.point.x, self.potential_coordinate.point.y] = self.cell_coordinates(random_index)
-            
-            # Publish current position and potential position for visualization
-            self.potential_publisher.publish(self.potential_coordinate)
-            self.current_publisher.publish(self.current_position)
+                # Taking a random cell and the corresponding cost value
+                random_index = randrange(occupancy_data_np.size)
+                self.potential_pos = occupancy_data_np[random_index]
 
-            # Check that the cell is not an obstacle
-            if self.potential_pos>= self.obstacle_probability:
+                # Check that the cell has not been checked before or is unknown
+                if random_index in self.occupancy_data_np_checked or self.potential_pos == -1:
+                    continue
+
+                # Compute correspondent row and column of the potential cell 
+                [self.potential_coordinate.point.x, self.potential_coordinate.point.y] = self.cell_coordinates(random_index)
                 
-                self.get_logger().info('Point was an obstacle with cost:' + str(self.potential_pos))
-                #time.sleep(3)
+                # Publish current position and potential position for visualization
+                self.potential_publisher.publish(self.potential_coordinate)
+                self.current_publisher.publish(self.current_position)
 
-                self.occupancy_data_np_checked = np.append(self.occupancy_data_np_checked, random_index)
-                continue
-            
-            # Check that the point is on the frontier
-            elif not self.frontier_check(occupancy_data_np, random_index):
+                # Check that the cell is not an obstacle
+                if self.potential_pos>= self.obstacle_probability:
+                    
+                    self.get_logger().info('Point was an obstacle with cost:' + str(self.potential_pos))
+                    #time.sleep(3)
 
-                self.get_logger().info('Point was not on frontier')
+                    self.occupancy_data_np_checked = np.append(self.occupancy_data_np_checked, random_index)
+                    continue
+                
+                # Check that the point is on the frontier
+                elif not self.frontier_check(occupancy_data_np, random_index):
 
-                self.occupancy_data_np_checked = np.append(self.occupancy_data_np_checked, random_index)
-                continue
-  
-            else:
-                self.get_logger().info('Found Good Point')
-                self.get_logger().info('Checking Point Distance')
+                    self.get_logger().info('Point was not on frontier')
 
-                distance2new = math.sqrt(
-                    (self.potential_coordinate.point.x - self.current_position.point.x)**2 +
-                    (self.potential_coordinate.point.y- self.current_position.point.y)**2
-                )
-
-
-                if min_distance < distance2new < max_distance:
-                    self.new_waypoint.pose.position.x = self.potential_coordinate.point.x
-                    self.new_waypoint.pose.position.y = self.potential_coordinate.point.y
-                    self.get_logger().info('Point Distance:' + str(distance2new))
-            
-                    isthisagoodwaypoint = True
-
-                    #Put a box arond the published point in the array of the already checked points
-                    self.box_checked(random_index) 
-                    self.strategy_counter -= 1
-                    self.get_logger().info("Remainig points beofre new strategy:" + str(self.strategy_counter))
-
+                    self.occupancy_data_np_checked = np.append(self.occupancy_data_np_checked, random_index)
+                    continue
+    
                 else:
-                    self.get_logger().info('Point not in range, Finding New...')
-                    isthisagoodwaypoint = False
-                    still_looking = False
+                    self.get_logger().info('Found Good Point')
+                    self.get_logger().info('Checking Point Distance')
 
+                    distance2new = math.sqrt(
+                        (self.potential_coordinate.point.x - self.current_position.point.x)**2 +
+                        (self.potential_coordinate.point.y- self.current_position.point.y)**2
+                    )
+
+
+                    if min_distance < distance2new < max_distance:
+                        self.new_waypoint.pose.position.x = self.potential_coordinate.point.x
+                        self.new_waypoint.pose.position.y = self.potential_coordinate.point.y
+                        self.get_logger().info('Point Distance:' + str(distance2new))
+                
+                        isthisagoodwaypoint = True
+
+                        #Put a box arond the published point in the array of the already checked points
+                        self.box_checked(random_index) 
+                        self.strategy_counter -= 1
+                        self.get_logger().info("Remainig points beofre new strategy:" + str(self.strategy_counter))
+
+                    else:
+                        self.get_logger().info('Point not in range, Finding New...')
+                        isthisagoodwaypoint = False
+                        still_looking = False
+
+                        # If the point is not in range for 30 iterations, adopt a new strategy
+                        not_in_range_count += 1
+                        if not_in_range_count > 100:
+                            self.get_logger().info('Could not find point in range, adopting new strategy...')
+                            time.sleep(3)
+                            self.new_strategy()
+                            isthisagoodwaypoint = True
+                            
         #New strategy
-        if self.strategy_counter == 0:
+        else:
             self.strategy_counter = 5
-            array = self.new_strategy()
-            [self.new_waypoint.pose.position.x,self.new_waypoint.pose.position.y]= self.cell_coordinates(array[0][0])
-            self.box_checked(array[0][0])
+            self.new_strategy()
+           
 
 
 
@@ -245,7 +255,7 @@ class Autopilot(Node):
     def new_strategy(self):
         """Processes the occupancy grid and creates a sorted list of cells based on the number of uncertain cells around them."""
 
-        self.get_logger().info('Processing occupancy grid after 40 waypoints...')
+        self.get_logger().info('New Strategy: Processing occupancy grid ...')
         occupancy_data_np = np.array(self.current_grid.data)
         width = self.current_grid.info.width
         height = self.current_grid.info.height
@@ -269,8 +279,13 @@ class Autopilot(Node):
 
         # Sort the list by uncertain_count in descending order
         sorted_counts = sorted(counts_list, key=lambda x: x[1], reverse=True)
-        #self.get_logger().info(str(sorted_counts))
-        return sorted_counts
+        
+
+        [self.new_waypoint.pose.position.x,self.new_waypoint.pose.position.y]= self.cell_coordinates(sorted_counts[0][0])
+        self.box_checked(sorted_counts[0][0])
+        [self.potential_coordinate.point.x, self.potential_coordinate.point.y] = self.cell_coordinates(sorted_counts[0][0])
+        self.potential_publisher.publish(self.potential_coordinate)
+        
 
 
     def count_uncertain_cells_around(self, index, occupancy_data_np, width, height):
@@ -285,7 +300,7 @@ class Autopilot(Node):
                 try:
                     if occupancy_data_np[index + slider] == -1:
                         uncertain_count += 1
-                #the index of a point next to the random_index may not be within the range of occupancy_data.data, so the IndexError is handled below
+                #the index of a point next to the index may not be within the range of occupancy_data.data, so the IndexError is handled below
                 except IndexError:
                     continue
         return uncertain_count
@@ -298,10 +313,9 @@ class Autopilot(Node):
         uncertain_indexes = 0
         obstacle_indexes  = 0
 
-        #Inspects the nature of points in a grid around the selected point
-        #TODO: Tune these values 
-        for x in range(-18,20):
-            for y in range(-18,20):
+        #Inspects the nature of points in a grid around the selected point 
+        for x in range(-9,10):
+            for y in range(-9,10):
                 slider = x * self.width + y
                 try:
                     if occupancy_data_np[random_index + slider] == -1:
@@ -311,8 +325,8 @@ class Autopilot(Node):
                 #the index of a point next to the random_index may not be within the range of occupancy_data.data, so the IndexError is handled below
                 except IndexError:
                     continue
-        #Code to determine how many uncertain and obstacle indices need to be near our point
-        if uncertain_indexes > 1: # and 0 < obstacle_indexes:
+         
+        if uncertain_indexes > 1: 
             return True
         else:
             return False
@@ -343,7 +357,7 @@ class Autopilot(Node):
 
         # Compute position with respect map frame of the potential cell
         x_coord = (col_index*resolution) + origin_x
-        y_coord = (slider*resolution) + origin_y
+        y_coord = (slider*resolution)    + origin_y
 
         return x_coord, y_coord
 
@@ -352,7 +366,7 @@ class Autopilot(Node):
         self.current_position.point.x = msg.pose.pose.position.x
         self.current_position.point.y = msg.pose.pose.position.y
         self.current_position.header.frame_id = msg.header.frame_id
-        #if self.searching_for_waypoint == False:
+        
             
 
     def difference_grid_indexes(self, occupancy_data_np):
