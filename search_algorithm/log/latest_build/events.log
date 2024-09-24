@@ -1,0 +1,127 @@
+[0.000000] (-) TimerEvent: {}
+[0.000715] (autopilot_pkg) JobQueued: {'identifier': 'autopilot_pkg', 'dependencies': OrderedDict()}
+[0.001356] (autopilot_pkg) JobStarted: {'identifier': 'autopilot_pkg'}
+[0.096662] (-) TimerEvent: {}
+[0.197638] (-) TimerEvent: {}
+[0.298534] (-) TimerEvent: {}
+[0.399458] (-) TimerEvent: {}
+[0.500248] (-) TimerEvent: {}
+[0.601232] (-) TimerEvent: {}
+[0.702344] (-) TimerEvent: {}
+[0.803749] (-) TimerEvent: {}
+[0.904460] (-) TimerEvent: {}
+[1.005649] (-) TimerEvent: {}
+[1.106708] (-) TimerEvent: {}
+[1.207819] (-) TimerEvent: {}
+[1.308928] (-) TimerEvent: {}
+[1.409640] (-) TimerEvent: {}
+[1.510570] (-) TimerEvent: {}
+[1.611456] (-) TimerEvent: {}
+[1.712343] (-) TimerEvent: {}
+[1.813810] (-) TimerEvent: {}
+[1.915363] (-) TimerEvent: {}
+[2.016689] (-) TimerEvent: {}
+[2.117732] (-) TimerEvent: {}
+[2.218836] (-) TimerEvent: {}
+[2.319782] (-) TimerEvent: {}
+[2.420851] (-) TimerEvent: {}
+[2.521946] (-) TimerEvent: {}
+[2.622926] (-) TimerEvent: {}
+[2.724224] (-) TimerEvent: {}
+[2.825451] (-) TimerEvent: {}
+[2.926629] (-) TimerEvent: {}
+[3.027532] (-) TimerEvent: {}
+[3.128666] (-) TimerEvent: {}
+[3.229821] (-) TimerEvent: {}
+[3.330387] (-) TimerEvent: {}
+[3.430964] (-) TimerEvent: {}
+[3.532058] (-) TimerEvent: {}
+[3.633122] (-) TimerEvent: {}
+[3.734216] (-) TimerEvent: {}
+[3.835436] (-) TimerEvent: {}
+[3.936279] (-) TimerEvent: {}
+[4.037300] (-) TimerEvent: {}
+[4.138343] (-) TimerEvent: {}
+[4.239344] (-) TimerEvent: {}
+[4.340534] (-) TimerEvent: {}
+[4.441739] (-) TimerEvent: {}
+[4.542934] (-) TimerEvent: {}
+[4.617024] (autopilot_pkg) Command: {'cmd': ['/usr/bin/python3', '-W', 'ignore:setup.py install is deprecated', 'setup.py', 'develop', '--editable', '--build-directory', '/mnt/c/Users/graci/Desktop/search_algorithm/build/autopilot_pkg/build', '--no-deps', 'symlink_data', '--force'], 'cwd': '/mnt/c/Users/graci/Desktop/search_algorithm/build/autopilot_pkg', 'env': {'LESSOPEN': '| /usr/bin/lesspipe %s', 'USER': 'grace', 'SHLVL': '1', 'LD_LIBRARY_PATH': '/usr/lib/x86_64-linux-gnu/gazebo-11/plugins:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/x86_64-linux-gnu:/opt/ros/humble/lib', 'WT_PROFILE_ID': '{e5a83caa-4c73-52b3-ae6b-bc438d721ef9}', 'HOME': '/home/grace', 'OLDPWD': '/mnt/c/Users/graci/Desktop/search_algorithm/src', 'ROS_PYTHON_VERSION': '3', 'DBUS_SESSION_BUS_ADDRESS': 'unix:path=/run/user/1000/bus', 'WSL_DISTRO_NAME': 'Ubuntu-22.04', 'WAYLAND_DISPLAY': 'wayland-0', 'COLCON_PREFIX_PATH': '/mnt/c/Users/graci/Desktop/search_algorithm/install', 'ROS_DISTRO': 'humble', 'LOGNAME': 'grace', 'NAME': 'gmill', 'WSL_INTEROP': '/run/WSL/336_interop', 'PULSE_SERVER': 'unix:/mnt/wslg/PulseServer', '_': '/usr/bin/colcon', 'ROS_VERSION': '2', 'TERM': 'xterm-256color', 'GAZEBO_MODEL_PATH': '/home/grace/.gazebo/models:', 'ROS_LOCALHOST_ONLY': '0', 'PATH': '/opt/ros/humble/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/lib/wsl/lib:/mnt/c/Windows/system32:/mnt/c/Windows:/mnt/c/Windows/System32/Wbem:/mnt/c/Windows/System32/WindowsPowerShell/v1.0/:/mnt/c/Windows/System32/OpenSSH/:/mnt/c/Program Files/dotnet/:/mnt/c/Users/graci/AppData/Local/Microsoft/WindowsApps:/mnt/c/Users/graci/AppData/Local/Programs/Microsoft VS Code/bin:/snap/bin', 'WT_SESSION': '6357cff5-0c20-452d-bb77-e9a1052bd24e', 'XDG_RUNTIME_DIR': '/run/user/1000/', 'DISPLAY': ':0', 'LANG': 'en_US.UTF-8', 'LS_COLORS': 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:', 'AMENT_PREFIX_PATH': '/opt/ros/humble', 'SHELL': '/bin/bash', 'LESSCLOSE': '/usr/bin/lesspipe %s %s', 'PWD': '/mnt/c/Users/graci/Desktop/search_algorithm/build/autopilot_pkg', 'XDG_DATA_DIRS': '/usr/local/share:/usr/share:/var/lib/snapd/desktop', 'PYTHONPATH': '/mnt/c/Users/graci/Desktop/search_algorithm/build/autopilot_pkg/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/mnt/c/Users/graci/Desktop/search_algorithm/install/autopilot_pkg/lib/python3.10/site-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages', 'COLCON': '1', 'WSL2_GUI_APPS_ENABLED': '1', 'HOSTTYPE': 'x86_64', 'WSLENV': 'WT_SESSION:WT_PROFILE_ID:'}, 'shell': False}
+[4.652289] (-) TimerEvent: {}
+[4.753376] (-) TimerEvent: {}
+[4.854830] (-) TimerEvent: {}
+[4.956232] (-) TimerEvent: {}
+[5.057459] (-) TimerEvent: {}
+[5.158394] (-) TimerEvent: {}
+[5.259415] (-) TimerEvent: {}
+[5.360369] (-) TimerEvent: {}
+[5.461462] (-) TimerEvent: {}
+[5.562553] (-) TimerEvent: {}
+[5.663836] (-) TimerEvent: {}
+[5.764924] (-) TimerEvent: {}
+[5.865949] (-) TimerEvent: {}
+[5.966967] (-) TimerEvent: {}
+[6.067904] (-) TimerEvent: {}
+[6.169159] (-) TimerEvent: {}
+[6.270479] (-) TimerEvent: {}
+[6.371758] (-) TimerEvent: {}
+[6.472963] (-) TimerEvent: {}
+[6.574171] (-) TimerEvent: {}
+[6.674977] (-) TimerEvent: {}
+[6.776117] (-) TimerEvent: {}
+[6.877199] (-) TimerEvent: {}
+[6.978365] (-) TimerEvent: {}
+[7.079371] (-) TimerEvent: {}
+[7.183276] (-) TimerEvent: {}
+[7.284243] (-) TimerEvent: {}
+[7.313505] (autopilot_pkg) StdoutLine: {'line': b'running develop\n'}
+[7.384596] (-) TimerEvent: {}
+[7.485658] (-) TimerEvent: {}
+[7.586985] (-) TimerEvent: {}
+[7.688403] (-) TimerEvent: {}
+[7.789480] (-) TimerEvent: {}
+[7.890817] (-) TimerEvent: {}
+[7.895628] (autopilot_pkg) StdoutLine: {'line': b'running egg_info\n'}
+[7.901408] (autopilot_pkg) StdoutLine: {'line': b'writing autopilot_pkg.egg-info/PKG-INFO\n'}
+[7.921887] (autopilot_pkg) StdoutLine: {'line': b'writing dependency_links to autopilot_pkg.egg-info/dependency_links.txt\n'}
+[7.940519] (autopilot_pkg) StdoutLine: {'line': b'writing entry points to autopilot_pkg.egg-info/entry_points.txt\n'}
+[7.956529] (autopilot_pkg) StdoutLine: {'line': b'writing requirements to autopilot_pkg.egg-info/requires.txt\n'}
+[7.965124] (autopilot_pkg) StdoutLine: {'line': b'writing top-level names to autopilot_pkg.egg-info/top_level.txt\n'}
+[7.991061] (-) TimerEvent: {}
+[8.092057] (-) TimerEvent: {}
+[8.178975] (autopilot_pkg) StdoutLine: {'line': b"reading manifest file 'autopilot_pkg.egg-info/SOURCES.txt'\n"}
+[8.192188] (-) TimerEvent: {}
+[8.294073] (-) TimerEvent: {}
+[8.395400] (-) TimerEvent: {}
+[8.496407] (-) TimerEvent: {}
+[8.516842] (autopilot_pkg) StdoutLine: {'line': b"writing manifest file 'autopilot_pkg.egg-info/SOURCES.txt'\n"}
+[8.567278] (autopilot_pkg) StdoutLine: {'line': b'running build_ext\n'}
+[8.570257] (autopilot_pkg) StdoutLine: {'line': b'Creating /mnt/c/Users/graci/Desktop/search_algorithm/install/autopilot_pkg/lib/python3.10/site-packages/autopilot-pkg.egg-link (link to .)\n'}
+[8.596683] (-) TimerEvent: {}
+[8.643841] (autopilot_pkg) StdoutLine: {'line': b'Installing autopilot_node script to /mnt/c/Users/graci/Desktop/search_algorithm/install/autopilot_pkg/lib/autopilot_pkg\n'}
+[8.697105] (-) TimerEvent: {}
+[8.728753] (autopilot_pkg) StdoutLine: {'line': b'\n'}
+[8.733151] (autopilot_pkg) StdoutLine: {'line': b'Installed /mnt/c/Users/graci/Desktop/search_algorithm/build/autopilot_pkg\n'}
+[8.742033] (autopilot_pkg) StdoutLine: {'line': b'running symlink_data\n'}
+[8.797422] (-) TimerEvent: {}
+[8.839279] (autopilot_pkg) StdoutLine: {'line': b'symbolically linking /mnt/c/Users/graci/Desktop/search_algorithm/build/autopilot_pkg/resource/autopilot_pkg -> /mnt/c/Users/graci/Desktop/search_algorithm/install/autopilot_pkg/share/ament_index/resource_index/packages\n'}
+[8.897795] (-) TimerEvent: {}
+[8.916393] (autopilot_pkg) StdoutLine: {'line': b'symbolically linking /mnt/c/Users/graci/Desktop/search_algorithm/build/autopilot_pkg/package.xml -> /mnt/c/Users/graci/Desktop/search_algorithm/install/autopilot_pkg/share/autopilot_pkg\n'}
+[8.963581] (autopilot_pkg) CommandEnded: {'returncode': 0}
+[8.998055] (-) TimerEvent: {}
+[9.099293] (-) TimerEvent: {}
+[9.200953] (-) TimerEvent: {}
+[9.302285] (-) TimerEvent: {}
+[9.403541] (-) TimerEvent: {}
+[9.504970] (-) TimerEvent: {}
+[9.606403] (-) TimerEvent: {}
+[9.713800] (-) TimerEvent: {}
+[9.814968] (-) TimerEvent: {}
+[9.916196] (-) TimerEvent: {}
+[10.017499] (-) TimerEvent: {}
+[10.118885] (-) TimerEvent: {}
+[10.220163] (-) TimerEvent: {}
+[10.321572] (-) TimerEvent: {}
+[10.407805] (autopilot_pkg) JobEnded: {'identifier': 'autopilot_pkg', 'rc': 0}
+[10.437271] (-) TimerEvent: {}
+[10.438261] (-) EventReactorShutdown: {}

@@ -1,0 +1,31 @@
+running egg_info
+creating ../../build/autopilot_pkg/autopilot_pkg.egg-info
+writing ../../build/autopilot_pkg/autopilot_pkg.egg-info/PKG-INFO
+writing dependency_links to ../../build/autopilot_pkg/autopilot_pkg.egg-info/dependency_links.txt
+writing entry points to ../../build/autopilot_pkg/autopilot_pkg.egg-info/entry_points.txt
+writing requirements to ../../build/autopilot_pkg/autopilot_pkg.egg-info/requires.txt
+writing top-level names to ../../build/autopilot_pkg/autopilot_pkg.egg-info/top_level.txt
+writing manifest file '../../build/autopilot_pkg/autopilot_pkg.egg-info/SOURCES.txt'
+reading manifest file '../../build/autopilot_pkg/autopilot_pkg.egg-info/SOURCES.txt'
+writing manifest file '../../build/autopilot_pkg/autopilot_pkg.egg-info/SOURCES.txt'
+running build
+running build_py
+creating /mnt/c/Users/graci/Desktop/search_algorithm/build/autopilot_pkg/build
+creating /mnt/c/Users/graci/Desktop/search_algorithm/build/autopilot_pkg/build/lib
+creating /mnt/c/Users/graci/Desktop/search_algorithm/build/autopilot_pkg/build/lib/autopilot_pkg
+copying autopilot_pkg/__init__.py -> /mnt/c/Users/graci/Desktop/search_algorithm/build/autopilot_pkg/build/lib/autopilot_pkg
+running install
+running install_lib
+creating /mnt/c/Users/graci/Desktop/search_algorithm/install/autopilot_pkg/lib/python3.10/site-packages/autopilot_pkg
+copying /mnt/c/Users/graci/Desktop/search_algorithm/build/autopilot_pkg/build/lib/autopilot_pkg/__init__.py -> /mnt/c/Users/graci/Desktop/search_algorithm/install/autopilot_pkg/lib/python3.10/site-packages/autopilot_pkg
+byte-compiling /mnt/c/Users/graci/Desktop/search_algorithm/install/autopilot_pkg/lib/python3.10/site-packages/autopilot_pkg/__init__.py to __init__.cpython-310.pyc
+running install_data
+creating /mnt/c/Users/graci/Desktop/search_algorithm/install/autopilot_pkg/share/ament_index
+creating /mnt/c/Users/graci/Desktop/search_algorithm/install/autopilot_pkg/share/ament_index/resource_index
+creating /mnt/c/Users/graci/Desktop/search_algorithm/install/autopilot_pkg/share/ament_index/resource_index/packages
+copying resource/autopilot_pkg -> /mnt/c/Users/graci/Desktop/search_algorithm/install/autopilot_pkg/share/ament_index/resource_index/packages
+copying package.xml -> /mnt/c/Users/graci/Desktop/search_algorithm/install/autopilot_pkg/share/autopilot_pkg
+running install_egg_info
+Copying ../../build/autopilot_pkg/autopilot_pkg.egg-info to /mnt/c/Users/graci/Desktop/search_algorithm/install/autopilot_pkg/lib/python3.10/site-packages/autopilot_pkg-0.0.0-py3.10.egg-info
+running install_scripts
+writing list of installed files to '/mnt/c/Users/graci/Desktop/search_algorithm/build/autopilot_pkg/install.log'

@@ -1,0 +1,33 @@
+[4.524s] Invoking command in '/mnt/c/Users/graci/Desktop/search_algorithm/src/autopilot_pkg': PYTHONPATH=/mnt/c/Users/graci/Desktop/search_algorithm/build/autopilot_pkg/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/mnt/c/Users/graci/Desktop/search_algorithm/install/autopilot_pkg/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py egg_info --egg-base ../../build/autopilot_pkg build --build-base /mnt/c/Users/graci/Desktop/search_algorithm/build/autopilot_pkg/build install --record /mnt/c/Users/graci/Desktop/search_algorithm/build/autopilot_pkg/install.log --single-version-externally-managed install_data
+[6.467s] running egg_info
+[6.487s] creating ../../build/autopilot_pkg/autopilot_pkg.egg-info
+[6.501s] writing ../../build/autopilot_pkg/autopilot_pkg.egg-info/PKG-INFO
+[6.534s] writing dependency_links to ../../build/autopilot_pkg/autopilot_pkg.egg-info/dependency_links.txt
+[6.559s] writing entry points to ../../build/autopilot_pkg/autopilot_pkg.egg-info/entry_points.txt
+[6.578s] writing requirements to ../../build/autopilot_pkg/autopilot_pkg.egg-info/requires.txt
+[6.593s] writing top-level names to ../../build/autopilot_pkg/autopilot_pkg.egg-info/top_level.txt
+[6.617s] writing manifest file '../../build/autopilot_pkg/autopilot_pkg.egg-info/SOURCES.txt'
+[6.729s] reading manifest file '../../build/autopilot_pkg/autopilot_pkg.egg-info/SOURCES.txt'
+[6.988s] writing manifest file '../../build/autopilot_pkg/autopilot_pkg.egg-info/SOURCES.txt'
+[7.000s] running build
+[7.003s] running build_py
+[7.022s] creating /mnt/c/Users/graci/Desktop/search_algorithm/build/autopilot_pkg/build
+[7.029s] creating /mnt/c/Users/graci/Desktop/search_algorithm/build/autopilot_pkg/build/lib
+[7.037s] creating /mnt/c/Users/graci/Desktop/search_algorithm/build/autopilot_pkg/build/lib/autopilot_pkg
+[7.076s] copying autopilot_pkg/__init__.py -> /mnt/c/Users/graci/Desktop/search_algorithm/build/autopilot_pkg/build/lib/autopilot_pkg
+[7.141s] running install
+[7.144s] running install_lib
+[7.243s] creating /mnt/c/Users/graci/Desktop/search_algorithm/install/autopilot_pkg/lib/python3.10/site-packages/autopilot_pkg
+[7.323s] copying /mnt/c/Users/graci/Desktop/search_algorithm/build/autopilot_pkg/build/lib/autopilot_pkg/__init__.py -> /mnt/c/Users/graci/Desktop/search_algorithm/install/autopilot_pkg/lib/python3.10/site-packages/autopilot_pkg
+[7.474s] byte-compiling /mnt/c/Users/graci/Desktop/search_algorithm/install/autopilot_pkg/lib/python3.10/site-packages/autopilot_pkg/__init__.py to __init__.cpython-310.pyc
+[7.618s] running install_data
+[7.646s] creating /mnt/c/Users/graci/Desktop/search_algorithm/install/autopilot_pkg/share/ament_index
+[7.655s] creating /mnt/c/Users/graci/Desktop/search_algorithm/install/autopilot_pkg/share/ament_index/resource_index
+[7.662s] creating /mnt/c/Users/graci/Desktop/search_algorithm/install/autopilot_pkg/share/ament_index/resource_index/packages
+[7.713s] copying resource/autopilot_pkg -> /mnt/c/Users/graci/Desktop/search_algorithm/install/autopilot_pkg/share/ament_index/resource_index/packages
+[7.823s] copying package.xml -> /mnt/c/Users/graci/Desktop/search_algorithm/install/autopilot_pkg/share/autopilot_pkg
+[7.881s] running install_egg_info
+[7.954s] Copying ../../build/autopilot_pkg/autopilot_pkg.egg-info to /mnt/c/Users/graci/Desktop/search_algorithm/install/autopilot_pkg/lib/python3.10/site-packages/autopilot_pkg-0.0.0-py3.10.egg-info
+[8.998s] running install_scripts
+[9.252s] writing list of installed files to '/mnt/c/Users/graci/Desktop/search_algorithm/build/autopilot_pkg/install.log'
+[9.287s] Invoked command in '/mnt/c/Users/graci/Desktop/search_algorithm/src/autopilot_pkg' returned '0': PYTHONPATH=/mnt/c/Users/graci/Desktop/search_algorithm/build/autopilot_pkg/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/mnt/c/Users/graci/Desktop/search_algorithm/install/autopilot_pkg/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py egg_info --egg-base ../../build/autopilot_pkg build --build-base /mnt/c/Users/graci/Desktop/search_algorithm/build/autopilot_pkg/build install --record /mnt/c/Users/graci/Desktop/search_algorithm/build/autopilot_pkg/install.log --single-version-externally-managed install_data

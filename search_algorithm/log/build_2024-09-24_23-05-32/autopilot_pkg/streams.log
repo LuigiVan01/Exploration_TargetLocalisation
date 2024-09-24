@@ -1,0 +1,19 @@
+[4.649s] Invoking command in '/mnt/c/Users/graci/Desktop/search_algorithm/build/autopilot_pkg': PYTHONPATH=/mnt/c/Users/graci/Desktop/search_algorithm/build/autopilot_pkg/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/mnt/c/Users/graci/Desktop/search_algorithm/install/autopilot_pkg/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py develop --editable --build-directory /mnt/c/Users/graci/Desktop/search_algorithm/build/autopilot_pkg/build --no-deps symlink_data --force
+[7.314s] running develop
+[7.896s] running egg_info
+[7.902s] writing autopilot_pkg.egg-info/PKG-INFO
+[7.922s] writing dependency_links to autopilot_pkg.egg-info/dependency_links.txt
+[7.941s] writing entry points to autopilot_pkg.egg-info/entry_points.txt
+[7.957s] writing requirements to autopilot_pkg.egg-info/requires.txt
+[7.965s] writing top-level names to autopilot_pkg.egg-info/top_level.txt
+[8.180s] reading manifest file 'autopilot_pkg.egg-info/SOURCES.txt'
+[8.517s] writing manifest file 'autopilot_pkg.egg-info/SOURCES.txt'
+[8.568s] running build_ext
+[8.572s] Creating /mnt/c/Users/graci/Desktop/search_algorithm/install/autopilot_pkg/lib/python3.10/site-packages/autopilot-pkg.egg-link (link to .)
+[8.644s] Installing autopilot_node script to /mnt/c/Users/graci/Desktop/search_algorithm/install/autopilot_pkg/lib/autopilot_pkg
+[8.731s] 
+[8.734s] Installed /mnt/c/Users/graci/Desktop/search_algorithm/build/autopilot_pkg
+[8.743s] running symlink_data
+[8.840s] symbolically linking /mnt/c/Users/graci/Desktop/search_algorithm/build/autopilot_pkg/resource/autopilot_pkg -> /mnt/c/Users/graci/Desktop/search_algorithm/install/autopilot_pkg/share/ament_index/resource_index/packages
+[8.918s] symbolically linking /mnt/c/Users/graci/Desktop/search_algorithm/build/autopilot_pkg/package.xml -> /mnt/c/Users/graci/Desktop/search_algorithm/install/autopilot_pkg/share/autopilot_pkg
+[8.964s] Invoked command in '/mnt/c/Users/graci/Desktop/search_algorithm/build/autopilot_pkg' returned '0': PYTHONPATH=/mnt/c/Users/graci/Desktop/search_algorithm/build/autopilot_pkg/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/mnt/c/Users/graci/Desktop/search_algorithm/install/autopilot_pkg/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py develop --editable --build-directory /mnt/c/Users/graci/Desktop/search_algorithm/build/autopilot_pkg/build --no-deps symlink_data --force

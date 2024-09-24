@@ -1,0 +1,17 @@
+running develop
+running egg_info
+writing autopilot_pkg.egg-info/PKG-INFO
+writing dependency_links to autopilot_pkg.egg-info/dependency_links.txt
+writing entry points to autopilot_pkg.egg-info/entry_points.txt
+writing requirements to autopilot_pkg.egg-info/requires.txt
+writing top-level names to autopilot_pkg.egg-info/top_level.txt
+reading manifest file 'autopilot_pkg.egg-info/SOURCES.txt'
+writing manifest file 'autopilot_pkg.egg-info/SOURCES.txt'
+running build_ext
+Creating /mnt/c/Users/graci/Desktop/search_algorithm/install/autopilot_pkg/lib/python3.10/site-packages/autopilot-pkg.egg-link (link to .)
+Installing autopilot_node script to /mnt/c/Users/graci/Desktop/search_algorithm/install/autopilot_pkg/lib/autopilot_pkg
+
+Installed /mnt/c/Users/graci/Desktop/search_algorithm/build/autopilot_pkg
+running symlink_data
+symbolically linking /mnt/c/Users/graci/Desktop/search_algorithm/build/autopilot_pkg/resource/autopilot_pkg -> /mnt/c/Users/graci/Desktop/search_algorithm/install/autopilot_pkg/share/ament_index/resource_index/packages
+symbolically linking /mnt/c/Users/graci/Desktop/search_algorithm/build/autopilot_pkg/package.xml -> /mnt/c/Users/graci/Desktop/search_algorithm/install/autopilot_pkg/share/autopilot_pkg
