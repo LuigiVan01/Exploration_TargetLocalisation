@@ -220,7 +220,7 @@ class Autopilot(Node):
                         #Put a box arond the published point in the array of the already checked points
                         self.box_checked(random_index) 
                         self.strategy_counter -= 1
-                        self.get_logger().info("Remainig points beofre new strategy:" + str(self.strategy_counter))
+                        self.get_logger().info("Remaining points before new strategy:" + str(self.strategy_counter))
 
                     else:
                         self.get_logger().info('Point not in range, Finding New...')
