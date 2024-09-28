@@ -134,6 +134,8 @@ class Autopilot(Node):
         self.current_grid=grid
         self.get_logger().info('Grid Received')
 
+        #Initiates looking for new waypoint if exploration has just started.
+        #This is because readiness_check will not do this when exploration has just started
         if self.start:
             self.start=False
             self.next_waypoint()
