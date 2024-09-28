@@ -88,8 +88,8 @@ metr4202_2024_20/
 │   ├── build/
 │   ├── install/
 │   └── log/
-|── README.md
-|__ ignore
+│── README.md
+│__ ignore
 ```
 
 ## Contributors
