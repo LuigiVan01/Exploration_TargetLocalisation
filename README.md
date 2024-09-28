@@ -20,5 +20,5 @@ Students:
                       Luigi Vanacore         48543518
                       ZhuoXin Shi            48969761
                       Francis Weber          46992288
-                      Ricardo Westerman       
+                      Ricardo Westerman      45829453
                       Rui Xia                43507917
