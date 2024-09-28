@@ -93,11 +93,11 @@ metr4202_2024_20/
 ## Contributors
   Team 20:
 
-  Luigi Vanacore         48543518
-  ZhuoXin Shi            48969761
-  Francis Weber          46992288
-  Ricardo Westerman      45829453
-  Rui Xia                43507917
+ - Luigi Vanacore         48543518
+ - ZhuoXin Shi            48969761
+ - Francis Weber          46992288
+ - Ricardo Westerman      45829453
+ - Rui Xia                43507917
 
 
 ## License
