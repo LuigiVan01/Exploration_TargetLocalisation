@@ -242,17 +242,10 @@ class Autopilot(Node):
             self.strategy_counter = 5
             self.new_strategy()
            
-
-
-
         #Publish the new waypoint
         self.get_logger().info('Publishing waypoint...')
         self.waypoint_publisher.publish(self.new_waypoint)
 
-        
-        
-
-    
 
     def new_strategy(self):
         """Processes the occupancy grid and creates a sorted list of cells based on the number of uncertain cells around them."""
