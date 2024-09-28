@@ -1,0 +1,3 @@
+[console_scripts]
+autopilot_commander = autopilot.autopilot:main
+
