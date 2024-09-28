@@ -7,8 +7,7 @@ This repository contains the Autopilot package, which is designed to send waypoi
 - [Installation](#installation)
 - [Usage](#usage)
 - [Project Structure](#project-structure)
-- [Contributing](#contributing)
-- [License](#license)
+- [Contributors](#contributing)
 
 ## Prerequisites
 
@@ -24,6 +23,8 @@ Before you start, ensure that you have the following software installed:
 - [Gazebo](https://classic.gazebosim.org/tutorials?tut=install_ubuntu&cat=install)
 - [slam_toolbox](https://navigation.ros.org/setup_guides/slam_config.html)
 - [nav2](https://navigation.ros.org/getting_started/index.html)
+- [TurtleBot3](https://emanual.robotis.com/docs/en/platform/turtlebot3/ros2_setup/)
+
 
 ## Installation
 
@@ -87,7 +88,8 @@ metr4202_2024_20/
 │   ├── build/
 │   ├── install/
 │   └── log/
-└── README.md
+|── README.md
+|__ ignore
 ```
 
 ## Contributors
