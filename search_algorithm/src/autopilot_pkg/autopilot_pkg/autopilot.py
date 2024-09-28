@@ -134,6 +134,8 @@ class Autopilot(Node):
         self.current_grid=grid
         self.get_logger().info('Grid Received')
 
+        #Initiates looking for new waypoint if exploration has just started.
+        #This is because readiness_check will not do this when exploration has just started
         if self.start:
             self.start=False
             self.next_waypoint()
@@ -217,10 +219,10 @@ class Autopilot(Node):
                 
                         isthisagoodwaypoint = True
 
-                        #Put a box arond the published point in the array of the already checked points
+                        #Put a box around the published point in the array of the already checked points
                         self.box_checked(random_index) 
                         self.strategy_counter -= 1
-                        self.get_logger().info("Remainig points beofre new strategy:" + str(self.strategy_counter))
+                        self.get_logger().info("Remaining points before new strategy:" + str(self.strategy_counter))
 
                     else:
                         self.get_logger().info('Point not in range, Finding New...')
@@ -240,17 +242,10 @@ class Autopilot(Node):
             self.strategy_counter = 5
             self.new_strategy()
            
-
-
-
         #Publish the new waypoint
         self.get_logger().info('Publishing waypoint...')
         self.waypoint_publisher.publish(self.new_waypoint)
 
-        
-        
-
-    
 
     def new_strategy(self):
         """Processes the occupancy grid and creates a sorted list of cells based on the number of uncertain cells around them."""

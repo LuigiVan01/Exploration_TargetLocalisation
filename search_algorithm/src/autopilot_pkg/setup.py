@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-package_name = 'autopilot_pkg'
+package_name = 'autopilot'
 
 setup(
     name=package_name,
@@ -13,14 +13,13 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='frank',
-    maintainer_email='frank@todo.todo',
+    maintainer='lv',
+    maintainer_email='lv@todo.todo',
     description='TODO: Package description',
     license='TODO: License declaration',
     tests_require=['pytest'],
     entry_points={
-        'console_scripts': [
-            "autopilot_node = autopilot_pkg.autopilot:main"
+        'console_scripts': [ 'autopilot_commander=autopilot.autopilot:main'
         ],
     },
 )
