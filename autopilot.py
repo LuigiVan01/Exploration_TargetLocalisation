@@ -219,7 +219,7 @@ class Autopilot(Node):
                 
                         isthisagoodwaypoint = True
 
-                        #Put a box arond the published point in the array of the already checked points
+                        #Put a box around the published point in the array of the already checked points
                         self.box_checked(random_index) 
                         self.strategy_counter -= 1
                         self.get_logger().info("Remaining points before new strategy:" + str(self.strategy_counter))
