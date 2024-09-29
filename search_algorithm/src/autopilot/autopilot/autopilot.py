@@ -361,16 +361,6 @@ class Autopilot(Node):
         self.current_position.point.x = msg.pose.pose.position.x
         self.current_position.point.y = msg.pose.pose.position.y
         self.current_position.header.frame_id = msg.header.frame_id
-        
-            
-
-    def difference_grid_indexes(self, occupancy_data_np):
-        """ Compute the indexes of the cells that were unknown in the previous iteration and now are known """
-        difference_grid_indexes = []
-        for i in range(0, len(occupancy_data_np)):
-            if occupancy_data_np[i] != self.previous_grid.data[i] and self.previous_grid.data[i]==-1:
-                difference_grid_indexes=np.append(difference_grid_indexes, i)
-        return difference_grid_indexes
 
 
     def readiness_check(self, msg:BehaviorTreeLog):
