@@ -101,7 +101,3 @@ metr4202_2024_20/
  - Ricardo Westerman      45829453
  - Rui Xia                43507917
 
-
-## License
-
-[Include your license information here]
