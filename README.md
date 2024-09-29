@@ -21,9 +21,9 @@ Before you begin, ensure you have met the following requirements:
 Before you start, ensure that you have the following software installed:
 - [ROS2 Humble](https://docs.ros.org/en/humble/Installation.html)
 - [Gazebo](https://classic.gazebosim.org/tutorials?tut=install_ubuntu&cat=install)
-- [slam_toolbox](https://navigation.ros.org/setup_guides/slam_config.html)
-- [nav2](https://navigation.ros.org/getting_started/index.html)
-- [TurtleBot3](https://emanual.robotis.com/docs/en/platform/turtlebot3/ros2_setup/)
+- [slam_toolbox]([https://emanual.robotis.com/docs/en/platform/turtlebot3/ros2_setup/](https://emanual.robotis.com/docs/en/platform/turtlebot3/quick-start/#install-turtlebot3-packages-5:~:text=Install%20TurtleBot3%20Packages))
+- [nav2]([https://emanual.robotis.com/docs/en/platform/turtlebot3/ros2_setup/](https://emanual.robotis.com/docs/en/platform/turtlebot3/quick-start/#install-turtlebot3-packages-5:~:text=Install%20TurtleBot3%20Packages))
+- [TurtleBot3]([https://emanual.robotis.com/docs/en/platform/turtlebot3/ros2_setup/](https://emanual.robotis.com/docs/en/platform/turtlebot3/quick-start/#install-turtlebot3-packages-5:~:text=Install%20TurtleBot3%20Packages))
 
 
 ## Installation
