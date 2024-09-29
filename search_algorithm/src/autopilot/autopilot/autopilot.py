@@ -231,7 +231,7 @@ class Autopilot(Node):
 
                         # If the point is not in range for 30 iterations, adopt a new strategy
                         not_in_range_count += 1
-                        if not_in_range_count > 100:
+                        if not_in_range_count > 50:
                             self.get_logger().info('Could not find point in range, adopting new strategy...')
                             time.sleep(3)
                             self.new_strategy()
