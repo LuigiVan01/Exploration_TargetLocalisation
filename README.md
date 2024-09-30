@@ -7,7 +7,7 @@ This repository contains the Autopilot package, which is designed to send waypoi
 - [Installation](#installation)
 - [Usage](#usage)
 - [Project Structure](#project-structure)
-- [Contributors](#contributing)
+- [Contributors](#contributors)
 
 ## Prerequisites
 
