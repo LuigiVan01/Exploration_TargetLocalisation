@@ -32,12 +32,12 @@ To install this project, follow these steps:
 
 1. Clone the repository:
    ```
-   git clone https://github.com/LuigiVan01/metr4202_2024_20.git
+   git clone https://github.com/LuigiVan01/metr4202_2024_team20.git
    ```
 
 2. Navigate to the workspace directory:
    ```
-   cd metr4202_2024_20/search_algo
+   cd metr4202_2024_team20/search_algorithm
    ```
 
 3. Build the workspace:
@@ -77,8 +77,8 @@ To run the Autopilot package:
 ## Project Structure
 
 ```
-metr4202_2024_20/
-├── search_algo/
+metr4202_2024_team20/
+├── search_algorithm/
 │   ├── src/
 │   │   └── autopilot/
 │   │       ├── autopilot/
