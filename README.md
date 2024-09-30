@@ -21,8 +21,8 @@ Before you begin, ensure you have met the following requirements:
 Before you start, ensure that you have the following software installed:
 - [ROS2 Humble](https://docs.ros.org/en/humble/Installation.html)
 - [Gazebo](https://classic.gazebosim.org/tutorials?tut=install_ubuntu&cat=install)
-- [Cartographer](https://emanual.robotis.com/docs/en/platform/turtlebot3/quick-start/#pc-setup)
-- [nav2](https://emanual.robotis.com/docs/en/platform/turtlebot3/quick-start/#pc-setup)
+- [Cartographer](https://emanual.robotis.com/docs/en/platform/turtlebot3/quick-start/#pc-setup)  
+- [Navigation2](https://emanual.robotis.com/docs/en/platform/turtlebot3/quick-start/#pc-setup)
 - [TurtleBot3](https://emanual.robotis.com/docs/en/platform/turtlebot3/quick-start/#pc-setup)
 
 
