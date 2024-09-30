@@ -1,0 +1,25 @@
+[1.863s] Invoking command in '/home/rico/metr4202_2024_team20/search_algorithm/src/autopilot': PYTHONPATH=/home/rico/metr4202_2024_team20/search_algorithm/build/autopilot/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/rico/metr4202_2024_team20/search_algorithm/install/autopilot/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py egg_info --egg-base ../../build/autopilot build --build-base /home/rico/metr4202_2024_team20/search_algorithm/build/autopilot/build install --record /home/rico/metr4202_2024_team20/search_algorithm/build/autopilot/install.log --single-version-externally-managed install_data
+[2.460s] running egg_info
+[2.494s] writing ../../build/autopilot/autopilot.egg-info/PKG-INFO
+[2.495s] writing dependency_links to ../../build/autopilot/autopilot.egg-info/dependency_links.txt
+[2.496s] writing entry points to ../../build/autopilot/autopilot.egg-info/entry_points.txt
+[2.496s] writing requirements to ../../build/autopilot/autopilot.egg-info/requires.txt
+[2.497s] writing top-level names to ../../build/autopilot/autopilot.egg-info/top_level.txt
+[2.578s] reading manifest file '../../build/autopilot/autopilot.egg-info/SOURCES.txt'
+[2.580s] writing manifest file '../../build/autopilot/autopilot.egg-info/SOURCES.txt'
+[2.580s] running build
+[2.581s] running build_py
+[2.582s] copying autopilot/__init__.py -> /home/rico/metr4202_2024_team20/search_algorithm/build/autopilot/build/lib/autopilot
+[2.582s] copying autopilot/autopilot.py -> /home/rico/metr4202_2024_team20/search_algorithm/build/autopilot/build/lib/autopilot
+[2.583s] running install
+[2.598s] running install_lib
+[2.634s] copying /home/rico/metr4202_2024_team20/search_algorithm/build/autopilot/build/lib/autopilot_pkg/__init__.py -> /home/rico/metr4202_2024_team20/search_algorithm/install/autopilot/lib/python3.10/site-packages/autopilot_pkg
+[2.635s] running install_data
+[2.636s] copying resource/autopilot -> /home/rico/metr4202_2024_team20/search_algorithm/install/autopilot/share/ament_index/resource_index/packages
+[2.636s] running install_egg_info
+[2.677s] removing '/home/rico/metr4202_2024_team20/search_algorithm/install/autopilot/lib/python3.10/site-packages/autopilot-0.0.0-py3.10.egg-info' (and everything under it)
+[2.678s] Copying ../../build/autopilot/autopilot.egg-info to /home/rico/metr4202_2024_team20/search_algorithm/install/autopilot/lib/python3.10/site-packages/autopilot-0.0.0-py3.10.egg-info
+[2.680s] running install_scripts
+[3.008s] Installing autopilot script to /home/rico/metr4202_2024_team20/search_algorithm/install/autopilot/lib/autopilot
+[3.010s] writing list of installed files to '/home/rico/metr4202_2024_team20/search_algorithm/build/autopilot/install.log'
+[3.089s] Invoked command in '/home/rico/metr4202_2024_team20/search_algorithm/src/autopilot' returned '0': PYTHONPATH=/home/rico/metr4202_2024_team20/search_algorithm/build/autopilot/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/rico/metr4202_2024_team20/search_algorithm/install/autopilot/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py egg_info --egg-base ../../build/autopilot build --build-base /home/rico/metr4202_2024_team20/search_algorithm/build/autopilot/build install --record /home/rico/metr4202_2024_team20/search_algorithm/build/autopilot/install.log --single-version-externally-managed install_data

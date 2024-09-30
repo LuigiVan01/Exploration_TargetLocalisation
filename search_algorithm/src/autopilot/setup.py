@@ -19,7 +19,7 @@ setup(
     license='TODO: License declaration',
     tests_require=['pytest'],
     entry_points={
-        'console_scripts': [ 'autopilot_commander=autopilot.autopilot:main'
+        'console_scripts': [ 'autopilot=autopilot.autopilot:main'
         ],
     },
 )
