@@ -11,19 +11,14 @@ This repository contains the Autopilot package, which is designed to send waypoi
 
 ## Prerequisites
 
-Before you begin, ensure you have met the following requirements:
-* Ubuntu 22.04 or compatible Linux distribution
-* ROS2 Humble installed
-* Gazebo installed
-* SLAM Toolbox and Nav2 packages installed
-* Turtlebot3 packages installed
+Before you begin, ensure you have Ubuntu 22.04 or compatible Linux distribution and the following software installed:
 
-Before you start, ensure that you have the following software installed:
 - [ROS2 Humble](https://docs.ros.org/en/humble/Installation.html)
 - [Gazebo](https://classic.gazebosim.org/tutorials?tut=install_ubuntu&cat=install)
 - [Cartographer](https://emanual.robotis.com/docs/en/platform/turtlebot3/quick-start/#pc-setup)  
 - [Navigation2](https://emanual.robotis.com/docs/en/platform/turtlebot3/quick-start/#pc-setup)
 - [TurtleBot3](https://emanual.robotis.com/docs/en/platform/turtlebot3/quick-start/#pc-setup)
+- [Numpy](https://numpy.org/install/)
 
 
 ## Installation
