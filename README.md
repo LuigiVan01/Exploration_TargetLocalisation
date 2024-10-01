@@ -49,7 +49,7 @@ To install this project, follow these steps:
 
 To run the Autopilot package:
 
-1. Launch Gazebo with your Turtlebot3 model (you can replace `turtlebot3_world.launch.py` with the appropriate map launch file you want to explore):
+1. Launch Gazebo with your Turtlebot3 model (you can replace `turtlebot3_world.launch.py` with the appropriate launch file of the map you want to explore):
    ```
    ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
    ```
