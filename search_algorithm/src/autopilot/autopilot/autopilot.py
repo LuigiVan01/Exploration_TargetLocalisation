@@ -29,7 +29,7 @@ class Autopilot(Node):
         self.parallel_callback_group = ReentrantCallbackGroup()
 
         # Initilizing the probablity at which we consider there to be an obstacle
-        self.obstacle_probability = 90
+        self.obstacle_probability = 85
 
         # Specifies how many incoming messages should be buffered
         self.queue_size = 10
@@ -352,7 +352,7 @@ class Autopilot(Node):
 
         # Compute position with respect map frame of the potential cell
         x_coord = (col_index*resolution) + origin_x
-        y_coord = (row_index*resolution)    + origin_y
+        y_coord = (row_index*resolution) + origin_y
 
         return x_coord, y_coord
 
