@@ -322,7 +322,7 @@ class Autopilot(Node):
                 except IndexError:
                     continue
          
-        if uncertain_indexes > 1: 
+        if uncertain_indexes > 20:
             return True
         else:
             return False
