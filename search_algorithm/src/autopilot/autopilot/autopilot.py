@@ -137,8 +137,8 @@ class Autopilot(Node):
         #Initiates looking for new waypoint if exploration has just started.
         #This is because readiness_check will not do this when exploration has just started
         if self.start:
-            self.start=False
             self.next_waypoint()
+            self.start = False
             
             
 
@@ -154,7 +154,8 @@ class Autopilot(Node):
         isthisagoodwaypoint = False
 
         not_in_range_count=0
-        
+
+
         min_distance = 1
         max_distance = 3
 
@@ -212,7 +213,7 @@ class Autopilot(Node):
                     )
 
 
-                    if min_distance < distance2new < max_distance:
+                    if min_distance < distance2new < max_distance or self.start:
                         self.new_waypoint.pose.position.x = self.potential_coordinate.point.x
                         self.new_waypoint.pose.position.y = self.potential_coordinate.point.y
                         self.get_logger().info('Point Distance:' + str(distance2new))
