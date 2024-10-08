@@ -322,7 +322,7 @@ class Autopilot(Node):
                 except IndexError:
                     continue
          
-        if uncertain_indexes > 50:
+        if uncertain_indexes > 20:
             return True
         else:
             return False
@@ -331,8 +331,8 @@ class Autopilot(Node):
     def box_checked(self,new_waypoint_index):
         """ The indexes of a 1m^2 box around the new waypoint are added to the occupancy_data_np_checked"""
 
-        for x in range(-9,10):
-            for y in range(-9,10):
+        for x in range(-5,5):
+            for y in range(-5,5):
                 slider= x * self.width + y
                 self.occupancy_data_np_checked = np.append(self.occupancy_data_np_checked, new_waypoint_index+slider)
 
@@ -370,17 +370,18 @@ class Autopilot(Node):
         """
 
         for event in msg.event_log:
-
+            #self.get_logger().info(str(event.node_name))
+            #self.get_logger().info(str(event.current_status))
             if event.node_name == 'NavigationRecovery' and event.current_status =='IDLE':
                 #self.ready = True
                 self.next_waypoint()
 
-            #elif event.node_name == 'NavigateRecovery' and event.current_status =='IDLE':
+            elif event.node_name == 'NavigateRecovery' and event.current_status =='IDLE':
                 #self.ready = True
-            #    self.next_waypoint()
+                self.next_waypoint()
 
-           # elif event.node_name == 'GoalUpdated' and event.current_status == "FAILURE":
-           #     self.next_waypoint()
+            elif event.node_name == 'GoalUpdated' and event.current_status == "FAILURE":
+                self.next_waypoint()
       
             
     
