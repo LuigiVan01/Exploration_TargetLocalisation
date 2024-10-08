@@ -310,8 +310,8 @@ class Autopilot(Node):
         obstacle_indexes  = 0
 
         #Inspects the nature of points in a grid around the selected point 
-        for x in range(-5,5):
-            for y in range(-5,5):
+        for x in range(-4,3):
+            for y in range(-4,3):
                 slider = x * self.width + y
                 try:
                     if occupancy_data_np[random_index + slider] == -1:
