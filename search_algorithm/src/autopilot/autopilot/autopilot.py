@@ -132,7 +132,7 @@ class Autopilot(Node):
 
         self.previous_grid=self.current_grid
         self.current_grid=grid
-        self.get_logger().info('Grid Received')
+        #self.get_logger().info('Grid Received')
 
         #Initiates looking for new waypoint if exploration has just started.
         #This is because readiness_check will not do this when exploration has just started
@@ -310,8 +310,8 @@ class Autopilot(Node):
         obstacle_indexes  = 0
 
         #Inspects the nature of points in a grid around the selected point 
-        for x in range(-9,10):
-            for y in range(-9,10):
+        for x in range(-5,5):
+            for y in range(-5,5):
                 slider = x * self.width + y
                 try:
                     if occupancy_data_np[random_index + slider] == -1:
@@ -322,7 +322,7 @@ class Autopilot(Node):
                 except IndexError:
                     continue
          
-        if uncertain_indexes > 20:
+        if uncertain_indexes > 50:
             return True
         else:
             return False
