@@ -375,12 +375,12 @@ class Autopilot(Node):
                 #self.ready = True
                 self.next_waypoint()
 
-            elif event.node_name == 'NavigateRecovery' and event.current_status =='IDLE':
+            #elif event.node_name == 'NavigateRecovery' and event.current_status =='IDLE':
                 #self.ready = True
-                self.next_waypoint()
+            #    self.next_waypoint()
 
-            elif event.node_name == 'GoalUpdated' and event.current_status == "FAILURE":
-                self.next_waypoint()
+           # elif event.node_name == 'GoalUpdated' and event.current_status == "FAILURE":
+           #     self.next_waypoint()
       
             
     
