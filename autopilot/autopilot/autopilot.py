@@ -189,9 +189,6 @@ class Autopilot(Node):
                 # Check that the cell is not an obstacle
                 if self.potential_pos>= self.obstacle_probability:
                     
-                    self.get_logger().info('Point was an obstacle with cost:' + str(self.potential_pos))
-                    #time.sleep(3)
-
                     self.occupancy_data_np_checked = np.append(self.occupancy_data_np_checked, random_index)
                     continue
                 
@@ -370,14 +367,11 @@ class Autopilot(Node):
         """
 
         for event in msg.event_log:
-            #self.get_logger().info(str(event.node_name))
-            #self.get_logger().info(str(event.current_status))
+            
             if event.node_name == 'NavigationRecovery' and event.current_status =='IDLE':
-                #self.ready = True
                 self.next_waypoint()
 
             elif event.node_name == 'NavigateRecovery' and event.current_status =='IDLE':
-                #self.ready = True
                 self.next_waypoint()
 
             elif event.node_name == 'GoalUpdated' and event.current_status == "FAILURE":
