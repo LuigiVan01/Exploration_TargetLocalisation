@@ -369,26 +369,16 @@ class Autopilot(Node):
 
         for event in msg.event_log:
             
-            if event.node_name == 'NavigationRecovery' and event.current_status =='IDLE':
+            """if event.node_name == 'NavigationRecovery' and event.current_status =='IDLE':
                 self.get_logger().info('NavigationRecovery--IDLEEE')
                 time.sleep(2)
-                self.next_waypoint()
+                self.next_waypoint()"""
 
-            elif event.node_name == 'NavigateRecovery' and event.current_status =='IDLE':
+            if event.node_name == 'NavigateRecovery' and event.current_status =='IDLE':
                 self.get_logger().info('NavigateRecovery--IDLEEE')
                 time.sleep(2)
                 self.next_waypoint()
 
-            """elif event.node_name == 'ComputePathToPose' and event.current_status == "FAILURE":
-                self.get_logger().info('ComputePathToPose--FAILURE')
-                time.sleep(2)
-                self.next_waypoint()"""
-            
-
-            """elif event.node_name == 'GoalUpdated' and event.current_status == "FAILURE":
-                self.get_logger().info('GoalUpdated--FAILURE')
-                time.sleep(2)
-                self.next_waypoint()"""
             
 
       
@@ -400,12 +390,8 @@ class Autopilot(Node):
 def main():
     rclpy.init()
     autopilot_node = Autopilot()
-    #executor = MultiThreadedExecutor(num_threads=3)
-    #executor.add_node(autopilot_node)
     autopilot_node.get_logger().info('Running autopilot node')
     rclpy.spin(autopilot_node)
-    #autopilot_node.destroy_node()
-    #rclpy.shutdown()
 
 if __name__=='__main__':
     main()
