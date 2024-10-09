@@ -195,6 +195,9 @@ class Autopilot(Node):
                 
                 # Check that the point is on the frontier
                 elif not self.frontier_check(occupancy_data_np, random_index):
+
+                    #self.get_logger().info('Point was not on frontier')
+
                     self.occupancy_data_np_checked = np.append(self.occupancy_data_np_checked, random_index)
                     continue
     
@@ -376,10 +379,18 @@ class Autopilot(Node):
                 time.sleep(2)
                 self.next_waypoint()
 
-            elif event.node_name == 'GoalUpdated' and event.current_status == "FAILURE":
+            """elif event.node_name == 'ComputePathToPose' and event.current_status == "FAILURE":
+                self.get_logger().info('ComputePathToPose--FAILURE')
+                time.sleep(2)
+                self.next_waypoint()"""
+            
+
+            """elif event.node_name == 'GoalUpdated' and event.current_status == "FAILURE":
                 self.get_logger().info('GoalUpdated--FAILURE')
                 time.sleep(2)
-                self.next_waypoint()
+                self.next_waypoint()"""
+            
+
       
             
     
