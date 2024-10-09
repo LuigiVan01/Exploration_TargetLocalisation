@@ -40,6 +40,9 @@ class Autopilot(Node):
         # Initialize the the number of waypoints published
         self.waypoint_counter = 0
 
+        # Initialize the the number of waypoints published with the new strategy
+        self.new_strategy_counter = 0
+
         # Array of indexes already checked
         self.occupancy_data_np_checked = []
 
@@ -262,8 +265,19 @@ class Autopilot(Node):
                 continue
 
 
-            elif occupancy_data_np[index] >= self.obstacle_probability:
+            if occupancy_data_np[index] >= self.obstacle_probability:
                 self.occupancy_data_np_checked = np.append(self.occupancy_data_np_checked, index)
+                continue
+
+            [self.potential_coordinate.point.x, self.potential_coordinate.point.y] = self.cell_coordinates(index)
+
+            distance2new = math.sqrt(
+                        (self.potential_coordinate.point.x - self.current_position.point.x)**2 +
+                        (self.potential_coordinate.point.y- self.current_position.point.y)**2
+                    ) 
+
+            # Check if the distance is greater than 9 meters and counter is not a multiple of four
+            if distance2new > 9 and self.new_strategy_counter % 4 != 0:
                 continue
 
             else: 
@@ -278,6 +292,14 @@ class Autopilot(Node):
         [self.new_waypoint.pose.position.x,self.new_waypoint.pose.position.y]= self.cell_coordinates(sorted_counts[0][0])
         self.box_checked(sorted_counts[0][0])
         [self.potential_coordinate.point.x, self.potential_coordinate.point.y] = self.cell_coordinates(sorted_counts[0][0])
+
+        distance2new = math.sqrt(
+                        (self.potential_coordinate.point.x - self.current_position.point.x)**2 +
+                        (self.potential_coordinate.point.y- self.current_position.point.y)**2
+                    )
+        
+        self.get_logger().info('New Strategy: Point Distance:' + str(distance2new))
+        self.new_strategy_counter += 1
         self.potential_publisher.publish(self.potential_coordinate)
         
 
@@ -369,15 +391,13 @@ class Autopilot(Node):
 
         for event in msg.event_log:
             
-            """if event.node_name == 'NavigationRecovery' and event.current_status =='IDLE':
-                self.get_logger().info('NavigationRecovery--IDLEEE')
-                time.sleep(2)
-                self.next_waypoint()"""
 
             if event.node_name == 'NavigateRecovery' and event.current_status =='IDLE':
-                self.get_logger().info('NavigateRecovery--IDLEEE')
+                self.get_logger().info('NavigateRecovery--IDLE')
                 time.sleep(2)
                 self.next_waypoint()
+
+            
 
             
 
