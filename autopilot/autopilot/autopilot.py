@@ -26,7 +26,7 @@ class Autopilot(Node):
         
         """
         # Allow callback functions to be called in parallel
-        self.parallel_callback_group = ReentrantCallbackGroup()
+        #self.parallel_callback_group = ReentrantCallbackGroup()
 
         # Initilizing the probablity at which we consider there to be an obstacle
         self.obstacle_probability = 85
@@ -74,7 +74,7 @@ class Autopilot(Node):
             'behavior_tree_log',
             self.readiness_check,
             self.queue_size,
-            callback_group=self.parallel_callback_group
+            #callback_group=self.parallel_callback_group
         )
 
         #Subscribe to OccupancyGrid type topic "/map"
@@ -92,7 +92,7 @@ class Autopilot(Node):
             '/pose',
             self.current_position_callback,
             self.queue_size,
-            callback_group=self.parallel_callback_group
+            #callback_group=self.parallel_callback_group
         )
 
         
@@ -132,7 +132,6 @@ class Autopilot(Node):
 
         self.previous_grid=self.current_grid
         self.current_grid=grid
-        #self.get_logger().info('Grid Received')
 
         #Initiates looking for new waypoint if exploration has just started.
         #This is because readiness_check will not do this when exploration has just started
@@ -184,6 +183,8 @@ class Autopilot(Node):
                 
                 # Publish current position and potential position for visualization
                 self.potential_publisher.publish(self.potential_coordinate)
+                #self.get_logger().info('Is the point published?')
+                #time.sleep(0.5)
                 self.current_publisher.publish(self.current_position)
 
                 # Check that the cell is not an obstacle
@@ -194,9 +195,6 @@ class Autopilot(Node):
                 
                 # Check that the point is on the frontier
                 elif not self.frontier_check(occupancy_data_np, random_index):
-
-                    self.get_logger().info('Point was not on frontier')
-
                     self.occupancy_data_np_checked = np.append(self.occupancy_data_np_checked, random_index)
                     continue
     
@@ -369,12 +367,18 @@ class Autopilot(Node):
         for event in msg.event_log:
             
             if event.node_name == 'NavigationRecovery' and event.current_status =='IDLE':
+                self.get_logger().info('NavigationRecovery--IDLEEE')
+                time.sleep(2)
                 self.next_waypoint()
 
             elif event.node_name == 'NavigateRecovery' and event.current_status =='IDLE':
+                self.get_logger().info('NavigateRecovery--IDLEEE')
+                time.sleep(2)
                 self.next_waypoint()
 
             elif event.node_name == 'GoalUpdated' and event.current_status == "FAILURE":
+                self.get_logger().info('GoalUpdated--FAILURE')
+                time.sleep(2)
                 self.next_waypoint()
       
             
@@ -385,12 +389,12 @@ class Autopilot(Node):
 def main():
     rclpy.init()
     autopilot_node = Autopilot()
-    executor = MultiThreadedExecutor(num_threads=3)
-    executor.add_node(autopilot_node)
+    #executor = MultiThreadedExecutor(num_threads=3)
+    #executor.add_node(autopilot_node)
     autopilot_node.get_logger().info('Running autopilot node')
-    executor.spin()
-    autopilot_node.destroy_node()
-    rclpy.shutdown()
+    rclpy.spin(autopilot_node)
+    #autopilot_node.destroy_node()
+    #rclpy.shutdown()
 
 if __name__=='__main__':
     main()
