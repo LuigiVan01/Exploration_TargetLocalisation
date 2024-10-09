@@ -54,17 +54,12 @@ To run the Autopilot package:
    ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
    ```
 
-2. Launch SLAM Toolbox:
+2. Launch Nav2 and SLAM Toolbox :
    ```
-   ros2 launch slam_toolbox online_async_launch.py
-   ```
-
-3. Launch Nav2:
-   ```
-   ros2 launch turtlebot3_navigation2 navigation2.launch.py use_sim_time:=True
+   ros2 launch turtlebot3_navigation2 navigation2.launch.py use_sim_time:=True slam:=True
    ```
 
-4. Run the Autopilot node:
+3. Run the Autopilot node:
    ```
    ros2 run autopilot autopilot
    ```
