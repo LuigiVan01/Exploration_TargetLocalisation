@@ -1,3 +1,0 @@
-[console_scripts]
-autopilot_node = autopilot_pkg.autopilot:main
-
