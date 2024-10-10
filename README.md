@@ -68,16 +68,11 @@ To run the Autopilot package:
 
 ```
 metr4202_2024_team20/
-├── search_algorithm/
-│   ├── src/
-│   │   └── autopilot/
-│   │       ├── autopilot/
-│   │       │   └── autopilot.py
-│   │       ├── package.xml
-│   │       └── setup.py
-│   ├── build/
-│   ├── install/
-│   └── log/
+├──autopilot/
+│   └── autopilot/
+│       └── autopilot.py
+│       ├── package.xml
+│       └── setup.py   
 │── README.md
 └── ignore
 ```
