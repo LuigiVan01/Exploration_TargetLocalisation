@@ -4,14 +4,14 @@ import math
 import time
 from random import randrange
 from rclpy.node import Node
-from rclpy.executors import MultiThreadedExecutor
-from rclpy.callback_groups import ReentrantCallbackGroup
 from nav_msgs.msg import OccupancyGrid
 from nav2_msgs.msg import BehaviorTreeLog
 from geometry_msgs.msg import PoseWithCovarianceStamped
 from geometry_msgs.msg import PoseStamped
 from geometry_msgs.msg import PointStamped
-
+from sensor_msgs.msg import PointCloud2
+from sensor_msgs_py import point_cloud2
+from std_msgs.msg import Header
 
 
 class Autopilot(Node):
@@ -37,19 +37,17 @@ class Autopilot(Node):
         # Flag variable that indicates that the exploration is just started
         self.start=True
 
-        # Initialize the the number of waypoints published
+        # Initialize the number of waypoints published
         self.waypoint_counter = 0
 
-        # Initialize the the number of waypoints published with the new strategy
+        # Initialize the number of waypoints published with the new strategy
         self.new_strategy_counter = 0
 
         # Array of indexes already checked
         self.occupancy_data_np_checked = []
 
-        # Initialize the current, previous and difference grid
+        # Initialize the current grid
         self.current_grid = OccupancyGrid()
-        self.previous_grid = OccupancyGrid()
-        self.difference_grid=OccupancyGrid()
 
         # Initializing x and y coordinates of Turtlebot in space, to be populated later
         self.new_waypoint = PoseStamped()
@@ -120,20 +118,23 @@ class Autopilot(Node):
             self.queue_size
         )
 
+        # Publisher for publishing already checked points to for bug fixing
+        self.checked_points_publisher = self.create_publisher(
+            PointCloud2,
+            'checked_points',
+            self.queue_size
+        )
 
-        #Track number of waypoints  sent
-        self.waypoint_counter = 0.0
+
 
     
     
     def store_grid(self,grid:OccupancyGrid):
         """ 
             Callback function of /map topic.
-            Everytime it receives the OccupacyGrid message it stores it, without wasting the previous one.
+            Everytime it receives the OccupacyGrid message it stores it.
             At the start it launches the next_point() method since no message is received from the behavior_tree_log.
         """
-
-        self.previous_grid=self.current_grid
         self.current_grid=grid
 
         #Initiates looking for new waypoint if exploration has just started.
@@ -166,10 +167,10 @@ class Autopilot(Node):
 
         if self.strategy_counter > 0:
 
-            while isthisagoodwaypoint == False:
+            while not isthisagoodwaypoint:
 
                 # Added this so that the terminal isn't filled with messages so it's easier to read
-                if still_looking == False:
+                if not still_looking:
                     self.get_logger().info('Searching for good point...')
                     still_looking = True
 
@@ -247,6 +248,27 @@ class Autopilot(Node):
         #Publish the new waypoint
         self.get_logger().info('Publishing waypoint...')
         self.waypoint_publisher.publish(self.new_waypoint)
+        self.waypoint_counter += 1
+
+        if self.waypoint_counter % 10 == 0:
+            # Create a list to store all points
+            points = []
+
+            # Convert all indices to points (only x and y coordinates)
+            for index in self.occupancy_data_np_checked:
+                x, y = self.cell_coordinates(index)
+                points.append([x, y, 0.0])  # z=0 for 2D map
+
+            # Convert points to numpy array
+            points_np = np.array(points, dtype=np.float32)
+
+            # Create the header with just the frame_id
+            header = Header()
+            header.frame_id = 'map'
+
+            # Create and publish the point cloud
+            pc2 = point_cloud2.create_cloud_xyz32(header, points_np)
+            self.checked_points_publisher.publish(pc2)
 
 
     def new_strategy(self):
@@ -284,6 +306,8 @@ class Autopilot(Node):
                 # Count the number of uncertain cells around the current cell and append to the list
                 uncertain_count = self.count_uncertain_cells_around(index, occupancy_data_np, width, height)
                 counts_list.append((index, uncertain_count))
+                if uncertain_count==0:
+                    self.occupancy_data_np_checked = np.append(self.occupancy_data_np_checked, index)
 
         # Sort the list by uncertain_count in descending order
         sorted_counts = sorted(counts_list, key=lambda x: x[1], reverse=True)
@@ -394,18 +418,8 @@ class Autopilot(Node):
 
             if event.node_name == 'NavigateRecovery' and event.current_status =='IDLE':
                 self.get_logger().info('NavigateRecovery--IDLE')
-                time.sleep(2)
                 self.next_waypoint()
 
-            
-
-            
-
-      
-            
-    
-
-   
 
 def main():
     rclpy.init()
