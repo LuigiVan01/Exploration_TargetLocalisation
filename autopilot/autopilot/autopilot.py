@@ -168,7 +168,7 @@ class Autopilot(Node):
         if self.strategy_counter > 0:
 
             while not isthisagoodwaypoint:
-
+                self.occupancy_data_np_checked = []
                 # Added this so that the terminal isn't filled with messages so it's easier to read
                 if not still_looking:
                     self.get_logger().info('Searching for good point...')
@@ -279,10 +279,10 @@ class Autopilot(Node):
         width = self.current_grid.info.width
         height = self.current_grid.info.height
         counts_list = []
-
+        self.occupancy_data_np_checked = []
         # Iterate over all cells in the occupancy grid
         for index in range(len(occupancy_data_np)) :
-
+            
             if index in self.occupancy_data_np_checked or occupancy_data_np[index] == -1:
                 continue
 
