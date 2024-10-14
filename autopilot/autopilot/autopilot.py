@@ -43,9 +43,6 @@ class Autopilot(Node):
         # Initialize the number of waypoints published with the new strategy
         self.new_strategy_counter = 0
 
-        # Array of indexes already checked
-        self.occupancy_data_np_checked = []
-
         # Initialize the current grid
         self.current_grid = OccupancyGrid()
 
@@ -118,12 +115,6 @@ class Autopilot(Node):
             self.queue_size
         )
 
-        # Publisher for publishing already checked points to for bug fixing
-        self.checked_points_publisher = self.create_publisher(
-            PointCloud2,
-            'checked_points',
-            self.queue_size
-        )
 
 
 
@@ -168,7 +159,6 @@ class Autopilot(Node):
         if self.strategy_counter > 0:
 
             while not isthisagoodwaypoint:
-                self.occupancy_data_np_checked = []
                 # Added this so that the terminal isn't filled with messages so it's easier to read
                 if not still_looking:
                     self.get_logger().info('Searching for good point...')
@@ -178,8 +168,8 @@ class Autopilot(Node):
                 random_index = randrange(occupancy_data_np.size)
                 self.potential_pos = occupancy_data_np[random_index]
 
-                # Check that the cell has not been checked before or is unknown
-                if random_index in self.occupancy_data_np_checked or self.potential_pos == -1:
+                # Check that the cell is not unknown
+                if self.potential_pos == -1:
                     continue
 
                 # Compute correspondent row and column of the potential cell 
@@ -187,24 +177,11 @@ class Autopilot(Node):
                 
                 # Publish current position and potential position for visualization
                 self.potential_publisher.publish(self.potential_coordinate)
-                #self.get_logger().info('Is the point published?')
-                #time.sleep(0.5)
-                self.current_publisher.publish(self.current_position)
+        
 
-                # Check that the cell is not an obstacle
-                if self.potential_pos>= self.obstacle_probability:
-                    
-                    self.occupancy_data_np_checked = np.append(self.occupancy_data_np_checked, random_index)
+                # Check that the cell is not an obstacle and is on the frontier
+                if self.potential_pos>= self.obstacle_probability or not self.frontier_check(occupancy_data_np, random_index):
                     continue
-                
-                # Check that the point is on the frontier
-                elif not self.frontier_check(occupancy_data_np, random_index):
-
-                    #self.get_logger().info('Point was not on frontier')
-
-                    self.occupancy_data_np_checked = np.append(self.occupancy_data_np_checked, random_index)
-                    continue
-    
                 else:
                     self.get_logger().info('Found Good Point')
                     self.get_logger().info('Checking Point Distance')
@@ -222,8 +199,6 @@ class Autopilot(Node):
                 
                         isthisagoodwaypoint = True
 
-                        #Put a box around the published point in the array of the already checked points
-                        self.box_checked(random_index) 
                         self.strategy_counter -= 1
                         self.get_logger().info("Remaining points before new strategy:" + str(self.strategy_counter))
 
@@ -236,7 +211,6 @@ class Autopilot(Node):
                         not_in_range_count += 1
                         if not_in_range_count > 50:
                             self.get_logger().info('Could not find point in range, adopting new strategy...')
-                            time.sleep(3)
                             self.new_strategy()
                             isthisagoodwaypoint = True
                             
@@ -250,27 +224,6 @@ class Autopilot(Node):
         self.waypoint_publisher.publish(self.new_waypoint)
         self.waypoint_counter += 1
 
-        if self.waypoint_counter % 10 == 0:
-            # Create a list to store all points
-            points = []
-
-            # Convert all indices to points (only x and y coordinates)
-            for index in self.occupancy_data_np_checked:
-                x, y = self.cell_coordinates(index)
-                points.append([x, y, 0.0])  # z=0 for 2D map
-
-            # Convert points to numpy array
-            points_np = np.array(points, dtype=np.float32)
-
-            # Create the header with just the frame_id
-            header = Header()
-            header.frame_id = 'map'
-
-            # Create and publish the point cloud
-            pc2 = point_cloud2.create_cloud_xyz32(header, points_np)
-            self.checked_points_publisher.publish(pc2)
-
-
     def new_strategy(self):
         """Processes the occupancy grid and creates a sorted list of cells based on the number of uncertain cells around them."""
 
@@ -279,16 +232,10 @@ class Autopilot(Node):
         width = self.current_grid.info.width
         height = self.current_grid.info.height
         counts_list = []
-        self.occupancy_data_np_checked = []
         # Iterate over all cells in the occupancy grid
         for index in range(len(occupancy_data_np)) :
             
-            if index in self.occupancy_data_np_checked or occupancy_data_np[index] == -1:
-                continue
-
-
-            if occupancy_data_np[index] >= self.obstacle_probability:
-                self.occupancy_data_np_checked = np.append(self.occupancy_data_np_checked, index)
+            if occupancy_data_np[index] == -1 or occupancy_data_np[index] >= self.obstacle_probability:
                 continue
 
             [self.potential_coordinate.point.x, self.potential_coordinate.point.y] = self.cell_coordinates(index)
@@ -301,20 +248,16 @@ class Autopilot(Node):
             # Check if the distance is greater than 9 meters and counter is not a multiple of four
             if distance2new > 9 and self.new_strategy_counter % 4 != 0:
                 continue
-
             else: 
                 # Count the number of uncertain cells around the current cell and append to the list
                 uncertain_count = self.count_uncertain_cells_around(index, occupancy_data_np, width, height)
                 counts_list.append((index, uncertain_count))
-                if uncertain_count==0:
-                    self.occupancy_data_np_checked = np.append(self.occupancy_data_np_checked, index)
 
         # Sort the list by uncertain_count in descending order
         sorted_counts = sorted(counts_list, key=lambda x: x[1], reverse=True)
         
 
         [self.new_waypoint.pose.position.x,self.new_waypoint.pose.position.y]= self.cell_coordinates(sorted_counts[0][0])
-        self.box_checked(sorted_counts[0][0])
         [self.potential_coordinate.point.x, self.potential_coordinate.point.y] = self.cell_coordinates(sorted_counts[0][0])
 
         distance2new = math.sqrt(
@@ -371,15 +314,6 @@ class Autopilot(Node):
         else:
             return False
         
-
-    def box_checked(self,new_waypoint_index):
-        """ The indexes of a 1m^2 box around the new waypoint are added to the occupancy_data_np_checked"""
-
-        for x in range(-5,5):
-            for y in range(-5,5):
-                slider= x * self.width + y
-                self.occupancy_data_np_checked = np.append(self.occupancy_data_np_checked, new_waypoint_index+slider)
-
 
     def cell_coordinates(self,index):
         """
