@@ -40,6 +40,8 @@ class Autopilot(Node):
         # Initialize the number of waypoints published
         self.waypoint_counter = 0
 
+        self.goal_updated_counter=0
+
         # Initialize the number of waypoints published with the new strategy
         self.new_strategy_counter = 0
 
@@ -353,6 +355,13 @@ class Autopilot(Node):
             if event.node_name == 'NavigateRecovery' and event.current_status =='IDLE':
                 self.get_logger().info('NavigateRecovery--IDLE')
                 self.next_waypoint()
+                self.goal_updated_counter = 0
+
+            if event.node_name == 'GoalUpdated' and event.current_status =='FAILURE':
+                self.goal_updated_counter += 1
+                if self.goal_updated_counter > 500:
+                    self.next_waypoint()
+                    self.goal_updated_counter = 0
 
 
 def main():
