@@ -29,7 +29,7 @@ class Autopilot(Node):
         #self.parallel_callback_group = ReentrantCallbackGroup()
 
         # Initilizing the probablity at which we consider there to be an obstacle
-        self.obstacle_probability = 85
+        self.obstacle_probability = 90
 
         # Specifies how many incoming messages should be buffered
         self.queue_size = 10
