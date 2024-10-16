@@ -175,7 +175,7 @@ class Autopilot(Node):
 
                 if not still_looking:
                     self.get_logger().info('Searching for good point...')
-                    self.get_logger().info('This is the right file as of 16/10/24')
+                    self.get_logger().info('This is the right file as of 16/10/24') 
                     still_looking = True
 
                 # Taking a random cell and the corresponding cost value
