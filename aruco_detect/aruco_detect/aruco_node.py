@@ -72,10 +72,6 @@ class Aruco_detect(Node):
             tag_size_in_meters = 0.1
             cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
 
-            # Debug: Display original camera image
-            cv2.imshow("Camera Image", cv_image)
-            cv2.waitKey(1)  # For updating image display, 0 means no delay, 1 means 1ms delay
-
             # Convert to grayscale image
             gray = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
 
@@ -147,6 +143,9 @@ class Aruco_detect(Node):
 
         except Exception as e:
             self.get_logger().error(f"Failed to process image: {e}")
+
+
+            
 
     def load_camera_parameters(self, file_path):
         self.get_logger().info(f"Loading camera parameters from: {file_path}")
