@@ -28,6 +28,9 @@ class Autopilot(Node):
         # Allow callback functions to be called in parallel
         #self.parallel_callback_group = ReentrantCallbackGroup()
 
+        #Initializing variable for tracking if map is fully mapped
+        self.fully_mapped = False
+
         # Initilizing the probablity at which we consider there to be an obstacle
         self.obstacle_probability = 90
 
@@ -150,6 +153,7 @@ class Autopilot(Node):
         isthisagoodwaypoint = False
 
         not_in_range_count=0
+        points_checked = 0
 
 
         min_distance = 1
@@ -162,8 +166,16 @@ class Autopilot(Node):
 
             while not isthisagoodwaypoint:
                 # Added this so that the terminal isn't filled with messages so it's easier to read
+                points_checked += 1
+
+                if points_checked == 10000:
+                    self.get_logger().info('Could not find point after 10000 iterations, map is likely fully resolved, retracing...')
+                    self.fully_mapped = True
+                    isthisagoodwaypoint = False
+
                 if not still_looking:
                     self.get_logger().info('Searching for good point...')
+                    self.get_logger().info('This is the right file as of 16/10/24')
                     still_looking = True
 
                 # Taking a random cell and the corresponding cost value
@@ -215,7 +227,8 @@ class Autopilot(Node):
                             self.get_logger().info('Could not find point in range, adopting new strategy...')
                             self.new_strategy()
                             isthisagoodwaypoint = True
-                            
+
+                        
         #New strategy
         else:
             self.strategy_counter = 5
@@ -298,6 +311,7 @@ class Autopilot(Node):
         uncertain_indexes = 0
         obstacle_indexes  = 0
 
+    
         #Inspects the nature of points in a grid around the selected point 
         for x in range(-4,3):
             for y in range(-4,3):
@@ -310,6 +324,9 @@ class Autopilot(Node):
                 #the index of a point next to the random_index may not be within the range of occupancy_data.data, so the IndexError is handled below
                 except IndexError:
                     continue
+         
+        if self.fully_mapped and obstacle_indexes > 5:
+            return True
          
         if uncertain_indexes > 20:
             return True
