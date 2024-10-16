@@ -8,7 +8,7 @@ from geometry_msgs.msg import PoseWithCovarianceStamped
 from geometry_msgs.msg import PoseStamped
 from geometry_msgs.msg import PointStamped
 from std_msgs.msg import Header
-
+import yaml
 import cv2
 from cv_bridge import CvBridge
 from sensor_msgs.msg import Image
@@ -83,6 +83,8 @@ class Aruco_detect(Node):
             else:
                 self.get_logger().error("No corners detected")
                 return  # Exit early if no tags detected
+
+
             if self.camera_matrix is not None and self.dist_coeffs is not None:
                 assert self.camera_matrix.shape == (3, 3), "Incorrect format for camera_matrix"
                 assert self.dist_coeffs.shape == (1, 5) or self.dist_coeffs.shape == (
@@ -100,10 +102,6 @@ class Aruco_detect(Node):
                 cv2.aruco.drawDetectedMarkers(cv_image, corners, ids)
                 cv2.imshow("Detected ArUco Markers", cv_image)
                 cv2.waitKey(1)  # 1ms delay to update the window
-
-                if self.camera_matrix is None or self.dist_coeffs is None:
-                    self.get_logger().error("Camera parameters not loaded.")
-                    return
 
                 rvecs, tvecs, _ = cv2.aruco.estimatePoseSingleMarkers(corners, tag_size_in_meters, self.camera_matrix,
                                                                       self.dist_coeffs)
@@ -150,14 +148,15 @@ class Aruco_detect(Node):
     def load_camera_parameters(self, file_path):
         self.get_logger().info(f"Loading camera parameters from: {file_path}")
 
-        # Read camera calibration file
-        fs = cv2.FileStorage(file_path, cv2.FILE_STORAGE_READ)
-        if not fs.isOpened():
-            self.get_logger().error(f"Failed to open camera calibration file: {file_path}")
-            return
-        self.camera_matrix = fs.getNode("camera_matrix").mat()
-        self.dist_coeffs = fs.getNode("distortion_coefficients").mat()
-        fs.release()
+        try:
+            with open(file_path, 'r') as file:
+                camera_data = yaml.safe_load(file)
+
+                self.camera_matrix = np.array(camera_data['camera_matrix']['data']).reshape((3, 3))
+                self.dist_coeffs = np.array(camera_data['distortion_coefficients']['data']).reshape((1, 5))
+                #self.projection_matrix = np.array(camera_data['projection_matrix']['data']).reshape((3, 4))
+        except Exception as e:
+            self.get_logger().error(f"Error opening parameters file: {str(e)}")
 
         if self.camera_matrix is not None and self.dist_coeffs is not None:
             # Print information about the camera matrix and distortion coefficients
@@ -169,9 +168,6 @@ class Aruco_detect(Node):
             1, 4), "Incorrect format for dist_coeffs"
         if self.camera_matrix is None or self.dist_coeffs is None:
             self.get_logger().error("Failed to load camera parameters")
-        else:
-            self.get_logger().info(f"Loaded camera matrix: {self.camera_matrix}")
-            self.get_logger().info(f"Loaded distortion coefficients: {self.dist_coeffs}")
 
 
 def main():
