@@ -35,8 +35,6 @@ class Aruco_detect(Node):
         self.current_position = PointStamped()
         self.current_position.header.frame_id = 'map'
 
-        self.robot_orientation = [0, 0, 0, 0]
-
         # Subscribe to /pose to determine the position of Turtlebot
         self.position_subscriber = self.create_subscription(
             PoseWithCovarianceStamped,
@@ -59,27 +57,12 @@ class Aruco_detect(Node):
             'aruco_position',
             self.queue_size
         )
-    
-    def quaternion_to_yaw(self, x, y, z, w):
-        """
-        Convert a quaternion to yaw angle (rotation around Z axis)
-        """
-        # Calculate yaw (z-axis rotation) from quaternion
-        siny_cosp = 2 * (w * z + x * y)
-        cosy_cosp = 1 - 2 * (y * y + z * z)
-        yaw = math.atan2(siny_cosp, cosy_cosp)
-        return yaw
 
     def current_position_callback(self, msg: PoseWithCovarianceStamped):
-
-        # Exctact position (x, y)
+        # Return current robot pose, unless searching for waypoint
         self.current_position.point.x = msg.pose.pose.position.x
         self.current_position.point.y = msg.pose.pose.position.y
         self.current_position.header.frame_id = msg.header.frame_id
-
-         # Extract orientation (quaternion)
-        orientation_q = msg.pose.pose.orientation
-        self.robot_orientation = [orientation_q.x, orientation_q.y, orientation_q.z, orientation_q.w]
 
     def image_callback(self, msg: Image):
         self.get_logger().info('Received image for ArUco detection')
@@ -137,23 +120,18 @@ class Aruco_detect(Node):
                     # Get robot's current global position (using self.current_position)
                     robot_x = self.current_position.point.x
                     robot_y = self.current_position.point.y
-                    robot_yaw = self.quaternion_to_yaw(self.robot_orientation[0], self.robot_orientation[1],
-                                                       self.robot_orientation[2], self.robot_orientation[3])
+                    robot_yaw = 0  # Assume no rotation for the robot, or you can obtain the yaw from the robot pose
 
                     # Calculate global coordinates (relative to robot pose)
-                    # Assuming the camera is mounted facing forward on the robot and considering the camera_rgb_optical_frame orientation
-                    tag_x_robot =  tvec[0][2]  # Forward direction in camera frame is Z-axis
-                    tag_y_robot = -tvec[0][0]  # Left direction in camera frame is negative X-axis
-
-                    # Calculate global coordinates
-                    global_x = robot_x + (tag_x_robot * math.cos(robot_yaw) - tag_y_robot * math.sin(robot_yaw))
-                    global_y = robot_y + (tag_x_robot * math.sin(robot_yaw) + tag_y_robot * math.cos(robot_yaw))
+                    global_x = robot_x + tvec[0][0]
+                    global_y = robot_y + tvec[0][1]
+                    # global_x = robot_x + (tvec[0][0] * math.cos(robot_yaw) - tvec[0][1] * math.sin(robot_yaw))
+                    # global_y = robot_y + (tvec[0][0] * math.sin(robot_yaw) + tvec[0][1] * math.cos(robot_yaw))
                     self.get_logger().info(f"Tag ID: {ids}, Global Position: x={global_x}, y={global_y}")
                     aruco = PointStamped()
-                    aruco.header.frame_id = 'camera_rgb_optical_frame'
-                    aruco.point.x = tvec[0][0]
-                    aruco.point.y = tvec[0][1]
-                    aruco.point.z = tvec[0][2]
+                    aruco.header.frame_id = 'map'
+                    aruco.point.x = global_x
+                    aruco.point.y = global_y
                     self.aruco_position_publisher.publish(aruco)
                     time.sleep(1)
 
@@ -179,7 +157,6 @@ class Aruco_detect(Node):
                 #self.projection_matrix = np.array(camera_data['projection_matrix']['data']).reshape((3, 4))
         except Exception as e:
             self.get_logger().error(f"Error opening parameters file: {str(e)}")
-    
 
         if self.camera_matrix is not None and self.dist_coeffs is not None:
             # Print information about the camera matrix and distortion coefficients
