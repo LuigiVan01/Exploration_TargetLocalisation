@@ -51,7 +51,7 @@ To run the Autopilot package:
 
 1. Launch Gazebo with your Turtlebot3 model (you can replace `turtlebot3_world.launch.py` with the appropriate launch file of the map you want to explore):
    ```
-   ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
+   ros2 launch metr4202_2024_team20 turtlebot3_world.launch.py
    ```
 
 2. Launch Nav2 and SLAM Toolbox :
@@ -59,9 +59,9 @@ To run the Autopilot package:
    ros2 launch turtlebot3_navigation2 navigation2.launch.py use_sim_time:=True slam:=True
    ```
 
-3. Run the Autopilot node:
+3. Run the Autopilot and Aruco Detection nodes together:
    ```
-   ros2 run autopilot autopilot
+   ros2 launch metr4202_2024_team20 combined_launch.py
    ```
 
 ## Project Structure
