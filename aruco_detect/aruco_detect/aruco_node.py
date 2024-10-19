@@ -68,13 +68,13 @@ class Aruco_detect(Node):
         self.aruco_position_publisher = self.create_publisher(
             PointStamped,
             'aruco_position',
-            self.queue_size
+            3
         )
 
         self.aruco_map_position_publisher = self.create_publisher(
             PointStamped,
             'aruco_map_position',
-            self.queue_size
+            3
         )       
     
     '''    def quaternion_to_yaw(self, x, y, z, w):
