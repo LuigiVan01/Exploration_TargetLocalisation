@@ -126,6 +126,7 @@ class Autopilot(Node):
 
 
 
+
     
     
     def store_grid(self,grid:OccupancyGrid):
@@ -172,13 +173,13 @@ class Autopilot(Node):
                 points_checked += 1
 
 
-                if self.new_strat_counter > 3:
-                    self.get_logger().info('Could not find point after 10 new strategy searches, map is likely fully resolved, retracing...')
+                if self.new_strat_counter > 5:
+                    self.get_logger().info('Could not find point after 5 new strategy searches, map is likely fully resolved, retracing...')
                     time.sleep(2)
                     self.fully_mapped = True
                     self.new_strat_counter = 0
-                if points_checked > 1000:
-                    self.get_logger().info('Could not find point after 1000 iterations, adopting new strategy...')
+                if points_checked > 10000:
+                    self.get_logger().info('Could not find point after 10000 iterations, adopting new strategy...')
                     time.sleep(2)
                     self.new_strategy()
                     self.new_strat_counter += 1
