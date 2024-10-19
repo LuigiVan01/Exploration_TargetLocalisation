@@ -28,11 +28,14 @@ class Autopilot(Node):
         # Allow callback functions to be called in parallel
         #self.parallel_callback_group = ReentrantCallbackGroup()
 
+        #counter for new strategies when map is fully searched
+        self.new_strat_counter = 0
+
         #Initializing variable for tracking if map is fully mapped
         self.fully_mapped = False
 
         # Initilizing the probablity at which we consider there to be an obstacle
-        self.obstacle_probability = 90
+        self.obstacle_probability = 70
 
         # Specifies how many incoming messages should be buffered
         self.queue_size = 10
@@ -168,14 +171,9 @@ class Autopilot(Node):
                 # Added this so that the terminal isn't filled with messages so it's easier to read
                 points_checked += 1
 
-                if points_checked == 10000:
-                    self.get_logger().info('Could not find point after 10000 iterations, map is likely fully resolved, retracing...')
-                    self.fully_mapped = True
-                    isthisagoodwaypoint = False
-
                 if not still_looking:
                     self.get_logger().info('Searching for good point...')
-                    self.get_logger().info('This is the right file as of 16/10/24') 
+                    self.get_logger().info('algorithm change at end') 
                     still_looking = True
 
                 # Taking a random cell and the corresponding cost value
@@ -227,6 +225,17 @@ class Autopilot(Node):
                             self.get_logger().info('Could not find point in range, adopting new strategy...')
                             self.new_strategy()
                             isthisagoodwaypoint = True
+                
+                if points_checked == 1000:
+                    self.get_logger().info('Could not find point after 1000 iterations, adopting new strategy...')
+                    self.new_strategy()
+                    self.new_strat_counter += 1
+                    isthisagoodwaypoint = True
+                
+                if self.new_strat_counter > 10:
+                    self.get_logger().info('Could not find point after 10 new strategy searches, map is likely fully resolved, retracing...')
+                    self.fully_mapped = True
+                    isthisagoodwaypoint = False
 
                         
         #New strategy
