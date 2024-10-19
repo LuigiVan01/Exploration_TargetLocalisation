@@ -35,7 +35,7 @@ class Autopilot(Node):
         self.fully_mapped = False
 
         # Initilizing the probablity at which we consider there to be an obstacle
-        self.obstacle_probability = 70
+        self.obstacle_probability = 80
 
         # Specifies how many incoming messages should be buffered
         self.queue_size = 10
@@ -168,9 +168,25 @@ class Autopilot(Node):
         if self.strategy_counter > 0:
 
             while not isthisagoodwaypoint:
-                # Added this so that the terminal isn't filled with messages so it's easier to read
+                
                 points_checked += 1
 
+
+                if self.new_strat_counter > 3:
+                    self.get_logger().info('Could not find point after 10 new strategy searches, map is likely fully resolved, retracing...')
+                    time.sleep(2)
+                    self.fully_mapped = True
+                    self.new_strat_counter = 0
+                if points_checked > 1000:
+                    self.get_logger().info('Could not find point after 1000 iterations, adopting new strategy...')
+                    time.sleep(2)
+                    self.new_strategy()
+                    self.new_strat_counter += 1
+                    isthisagoodwaypoint = True
+                    break
+
+
+                # Added this so that the terminal isn't filled with messages so it's easier to read
                 if not still_looking:
                     self.get_logger().info('Searching for good point...')
                     self.get_logger().info('algorithm change at end') 
@@ -226,17 +242,6 @@ class Autopilot(Node):
                             self.new_strategy()
                             isthisagoodwaypoint = True
                 
-                if points_checked == 1000:
-                    self.get_logger().info('Could not find point after 1000 iterations, adopting new strategy...')
-                    self.new_strategy()
-                    self.new_strat_counter += 1
-                    isthisagoodwaypoint = True
-                
-                if self.new_strat_counter > 10:
-                    self.get_logger().info('Could not find point after 10 new strategy searches, map is likely fully resolved, retracing...')
-                    self.fully_mapped = True
-                    isthisagoodwaypoint = False
-
                         
         #New strategy
         else:
@@ -336,10 +341,11 @@ class Autopilot(Node):
                 except IndexError:
                     continue
          
-        if self.fully_mapped and obstacle_indexes > 5:
-            return True
+
          
         if uncertain_indexes > 20:
+            return True
+        elif self.fully_mapped and obstacle_indexes > 5:
             return True
         else:
             return False
@@ -381,7 +387,7 @@ class Autopilot(Node):
             
 
             if event.node_name == 'NavigateRecovery' and event.current_status =='IDLE':
-                self.get_logger().info('NavigateRecovery--IDLE')
+                self.get_logger().info('NavigateRecovery--IDLE received')
                 self.next_waypoint()
                 self.goal_updated_counter = 0
 
