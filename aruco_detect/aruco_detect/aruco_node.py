@@ -12,11 +12,14 @@ import yaml
 import cv2
 from cv_bridge import CvBridge
 from sensor_msgs.msg import Image
-
+import os
 from tf2_ros import TransformException
 from tf2_ros.buffer import Buffer
 from tf2_ros.transform_listener import TransformListener
 import tf2_geometry_msgs
+
+CALIBARATION_FILE_RELATIVE_PATH = "../../../../../../src/metr4202_2024_team20/aruco_detect/calibration_file.yaml"
+
 
 
 class Aruco_detect(Node):
@@ -25,7 +28,7 @@ class Aruco_detect(Node):
         super().__init__('autopilot')
         self.camera_matrix = None
         self.dist_coeffs = None
-        self.load_camera_parameters("/home/lv/turtlebot3_ws/src/aruco_detect/calibration_file.yaml")
+        self.load_camera_parameters()
 
         self.queue_size = 10
 
@@ -190,11 +193,22 @@ class Aruco_detect(Node):
 
             
 
-    def load_camera_parameters(self, file_path):
-        self.get_logger().info(f"Loading camera parameters from: {file_path}")
+    def load_camera_parameters(self):
+
+        # Get the current directory of the script
+        current_dir = os.path.dirname(os.path.realpath(__file__))
+
+        # Go out of the current directory and then access the calibration_file.yaml
+        relative_path = os.path.join(current_dir,CALIBARATION_FILE_RELATIVE_PATH )
+
+        # Normalize the path to handle any system-specific path formatting
+        relative_path = os.path.normpath(relative_path)
+
+
+        self.get_logger().info(f"Loading camera parameters from: {relative_path}")
 
         try:
-            with open(file_path, 'r') as file:
+            with open(relative_path, 'r') as file:
                 camera_data = yaml.safe_load(file)
 
                 self.camera_matrix = np.array(camera_data['camera_matrix']['data']).reshape((3, 3))
