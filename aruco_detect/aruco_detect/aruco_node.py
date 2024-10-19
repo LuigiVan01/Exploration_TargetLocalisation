@@ -77,15 +77,15 @@ class Aruco_detect(Node):
             self.queue_size
         )       
     
-    def quaternion_to_yaw(self, x, y, z, w):
-        """
-        Convert a quaternion to yaw angle (rotation around Z axis)
-        """
-        # Calculate yaw (z-axis rotation) from quaternion
-        siny_cosp = 2 * (w * z + x * y)
-        cosy_cosp = 1 - 2 * (y * y + z * z)
-        yaw = math.atan2(siny_cosp, cosy_cosp)
-        return yaw
+    '''    def quaternion_to_yaw(self, x, y, z, w):
+            """
+            Convert a quaternion to yaw angle (rotation around Z axis)
+            """
+            # Calculate yaw (z-axis rotation) from quaternion
+            siny_cosp = 2 * (w * z + x * y)
+            cosy_cosp = 1 - 2 * (y * y + z * z)
+            yaw = math.atan2(siny_cosp, cosy_cosp)
+            return yaw'''
 
     def current_position_callback(self, msg: PoseWithCovarianceStamped):
 
@@ -132,10 +132,10 @@ class Aruco_detect(Node):
                 # If Aruco tags detected, print the tag IDs
                 self.get_logger().info(f"Detected ArUco marker(s) with ID(s): {ids}")
 
-                # Visualize the detected tags, display on the image
+                """# Visualize the detected tags, display on the image
                 cv2.aruco.drawDetectedMarkers(cv_image, corners, ids)
                 cv2.imshow("Detected ArUco Markers", cv_image)
-                cv2.waitKey(1)  # 1ms delay to update the window
+                cv2.waitKey(1)  # 1ms delay to update the window"""
 
                 rvecs, tvecs, _ = cv2.aruco.estimatePoseSingleMarkers(corners, tag_size_in_meters, self.camera_matrix,
                                                                       self.dist_coeffs)

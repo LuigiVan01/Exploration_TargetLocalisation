@@ -101,7 +101,13 @@ class Autopilot(Node):
             #callback_group=self.parallel_callback_group
         )
 
-        
+        self.aruco_map_position_sub = self.create_subscription(
+            PointStamped,
+            'aruco_map_position',
+            self.aruco_map_position_callback,
+            self.queue_size
+        ) 
+
         #Create publisher to publish next waypoint parameters to
         self.waypoint_publisher = self.create_publisher(
             PoseStamped,
@@ -378,6 +384,13 @@ class Autopilot(Node):
         self.current_position.point.y = msg.pose.pose.position.y
         self.current_position.header.frame_id = msg.header.frame_id
 
+    def aruco_map_position_callback(self, msg:PointStamped):
+        #
+        self.new_waypoint.pose.position.x = msg.point.x
+        self.new_waypoint.pose.position.y = msg.point.y
+        self.waypoint_publisher.publish(self.new_waypoint)
+        self.get_logger().info('Going towards the Aruco Marker')
+        time.sleep(10)
 
     def readiness_check(self, msg:BehaviorTreeLog):
         """
