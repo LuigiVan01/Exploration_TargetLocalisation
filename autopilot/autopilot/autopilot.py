@@ -52,9 +52,6 @@ class Autopilot(Node):
         # Initialize the number of waypoints published with the new strategy
         self.new_strategy_counter = 0
 
-        # Initialize an array to store the path poses
-        self.path_poses = []
-
         # Initialize the current grid
         self.current_grid = OccupancyGrid()
 
@@ -112,13 +109,6 @@ class Autopilot(Node):
             'aruco_map_position',
             self.aruco_map_position_callback,
             1
-        ) 
-
-        self.path_planned_sub = self.create_subscription(
-            Path,
-            'plan',
-            self.plan_callback,
-            self.queue_size
         ) 
 
         #Create publisher to publish next waypoint parameters to
@@ -397,23 +387,16 @@ class Autopilot(Node):
         self.current_position.point.y = msg.pose.pose.position.y
         self.current_position.header.frame_id = msg.header.frame_id
 
-    def plan_callback(self, msg:Path):
-        self.path_poses = msg.poses
-        try:
-            self.pose_to_aruco= self.path_poses[-3]
-        except IndexError:
-            self.pose_to_aruco=self.new_waypoint
 
     def aruco_map_position_callback(self, msg:PointStamped):
         #
         self.new_waypoint.pose.position.x = msg.point.x
         self.new_waypoint.pose.position.y = msg.point.y
         self.waypoint_publisher.publish(self.new_waypoint)
-        time.sleep(10)
-        self.get_logger().info("Pose to Aruco marker is: " + str(self.pose_to_aruco.pose.position.x) + " " + str(self.pose_to_aruco.pose.position.y))
-        self.waypoint_publisher.publish(self.pose_to_aruco)
         self.get_logger().info('Going towards the Aruco Marker')
-        time.sleep(8)
+        time.sleep(10)
+        
+       
 
     def readiness_check(self, msg:BehaviorTreeLog):
         """
