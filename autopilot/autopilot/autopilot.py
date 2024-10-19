@@ -280,9 +280,11 @@ class Autopilot(Node):
         # Sort the list by uncertain_count in descending order
         sorted_counts = sorted(counts_list, key=lambda x: x[1], reverse=True)
         
-
-        [self.new_waypoint.pose.position.x,self.new_waypoint.pose.position.y]= self.cell_coordinates(sorted_counts[0][0])
-        [self.potential_coordinate.point.x, self.potential_coordinate.point.y] = self.cell_coordinates(sorted_counts[0][0])
+        try:
+            [self.new_waypoint.pose.position.x,self.new_waypoint.pose.position.y]  = self.cell_coordinates(sorted_counts[0][0])
+            [self.potential_coordinate.point.x, self.potential_coordinate.point.y] = self.cell_coordinates(sorted_counts[0][0])
+        except IndexError as e:
+            self.get_logger().error(f"List of points is empty: {e}")
 
         distance2new = math.sqrt(
                         (self.potential_coordinate.point.x - self.current_position.point.x)**2 +
