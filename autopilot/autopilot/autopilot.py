@@ -270,7 +270,7 @@ class Autopilot(Node):
                     ) 
 
             # Check if the distance is greater than 9 meters and counter is not a multiple of four
-            if distance2new > 9 and self.new_strategy_counter % 4 != 0:
+            if distance2new > 5 and self.new_strategy_counter % 4 != 0:
                 continue
             else: 
                 # Count the number of uncertain cells around the current cell and append to the list
