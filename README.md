@@ -59,9 +59,14 @@ To run the Autopilot package:
    ros2 launch turtlebot3_navigation2 navigation2.launch.py use_sim_time:=True slam:=True
    ```
 
-3. Run the Autopilot and Aruco Detection nodes together:
+3. Launch the Autopilot node:
    ```
-   ros2 launch metr4202_2024_team20 combined_launch.py
+   ros2 launch metr4202_2024_team20 autopilot_launch.py
+   ```
+
+4. Launch the Aruco Detection node:
+   ```
+   ros2 launch metr4202_2024_team20 aruco_launch.py
    ```
 
 ## Project Structure
