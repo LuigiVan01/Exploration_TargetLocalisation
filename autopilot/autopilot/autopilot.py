@@ -406,13 +406,28 @@ class Autopilot(Node):
             dy = aruco_position.point.y - self.current_position.pose.position.y
             distance = math.sqrt(dx*dx + dy*dy)
 
-            if distance > self.desired_distance:
-                # If further than 1.5 meters, move towards the ArUco marker
+            if distance > 5:
+                # If further than 6 meters, move to the midpoint
+                self.get_logger().info('ArUco marker is far. Moving to midpoint.')
+                ratio = 0.5  # Midpoint
+                self.new_waypoint.pose.position.x = self.current_position.pose.position.x + dx * ratio
+                self.new_waypoint.pose.position.y = self.current_position.pose.position.y + dy * ratio
+
+                # Calculate orientation towards the ArUco marker
+                angle = math.atan2(dy, dx)
+                self.new_waypoint.pose.orientation.z = math.sin(angle / 2)
+                self.new_waypoint.pose.orientation.w = math.cos(angle / 2)
+
+                self.waypoint_publisher.publish(self.new_waypoint)
+                self.localisation_started = True
+
+            elif distance > self.desired_distance:
+                # If further than 1 meters, move towards the ArUco marker
                 self.new_waypoint = PoseStamped()
                 self.new_waypoint.header.frame_id = 'map'
                 self.new_waypoint.header.stamp = self.get_clock().now().to_msg()
                 
-                # Calculate position 1.5 meters away from the ArUco marker
+                # Calculate position 1 meters away from the ArUco marker
                 ratio = 1 - (self.desired_distance/ distance)
                 self.new_waypoint.pose.position.x = self.current_position.pose.position.x + dx * ratio
                 self.new_waypoint.pose.position.y = self.current_position.pose.position.y + dy * ratio
