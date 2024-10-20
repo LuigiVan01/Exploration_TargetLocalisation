@@ -25,27 +25,56 @@ Before you begin, ensure you have Ubuntu 22.04 or compatible Linux distribution 
 
 To install this project, follow these steps:
 
-1. Clone the repository:
+1. If you haven't already, source the ros2 installation, and create a new directory for the workspace as below:
+   ```
+   source /opt/ros/humble/setup.bash
+   mkdir -p ~/workspace_name/src
+   ```
+   
+2. Clone the repository using the ubuntu terminal (if the terminal prompts you for credentials, sign into github within VS code etc, and use the built in terminal):
    ```
    git clone https://github.com/LuigiVan01/metr4202_2024_team20.git
    ```
 
-2. Navigate to the workspace directory:
-   ```
-   cd metr4202_2024_team20/search_algorithm
-   ```
+2. Copy the "autopilot" and "aruco_detect" found in the repository, to the "src" folder in your workspace
 
-3. Build the workspace:
+3. Build the workspace (after this step your workspace should now have folders "src", "install" and "build", with folders "autopilot" and "aruco_detect" in the "src" folder):
    ```
+   cd ~/workspace_name/
    colcon build
    ```
 
-4. Source the workspace:
+4. Source the workspace (and the gazebo setup if you haven't already):
    ```
-   source install/setup.bash
+   source ~/workspace_name/install/setup.bash
+   #code below is for sourcing the gazebo setup and is optional if you've already done it
+   source /usr/share/gazebo/setup.sh
    ```
 
-## Usage
+## Running Autopilot and Detection in Gazebo Simulations
+
+To run the Autopilot package:
+
+1. Launch a world file in Gazebo (the command given below assumes the "Turtlebot3 Simulation Package" has been installed, and will therefore depend on what gazebo models are installed on your system):
+   ```
+   ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
+   ```
+
+2. In a new terminal tab or window, run navigation2 using Rviz, running slam and using the simulation clock:
+   ```
+   ros2 launch turtlebot3_navigation2 navigation2.launch.py use_sim_time:=True slam:=True
+   ```
+
+4. In a new terminal tab or window, run the Autopilot node:
+   ```
+   ros2 launch autopilot autopilot.py
+   ```
+
+5. In a new terminal tab or window, run the Aruco Detection node:
+   ```
+   ros2 launch metr4202_2024_team20 aruco_launch.py
+   ```
+## Running Autopilot and Detection within a Physical Environment
 
 To run the Autopilot package:
 
