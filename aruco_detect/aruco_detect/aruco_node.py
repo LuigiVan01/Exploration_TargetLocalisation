@@ -58,6 +58,8 @@ class Aruco_detect(Node):
         self.update_interval = 2.0  # Update navigation goal every 2 seconds
         self.navigation_timer = self.create_timer(self.update_interval, self.update_estimates)
 
+        self.pos_queue_size=40
+
         self.received_image = False
 
         # Subscribe to /pose to determine the position of Turtlebot
@@ -111,7 +113,7 @@ class Aruco_detect(Node):
 
         if not self.received_image:
             self.get_logger().info('Received image for ArUco detection')
-            self.receivd_image = True
+            self.received_image = True
 
         try:
             # Convert ROS image message to OpenCV format
@@ -124,11 +126,8 @@ class Aruco_detect(Node):
             corners, ids, rejected = cv2.aruco.detectMarkers(gray, self.aruco_dict, parameters=self.aruco_params)
 
             # Verify if corners detected the tag
-            if corners is not None:
+            if len(corners)>0:
                 self.get_logger().info(f"Detected corners: {corners}")
-            else:
-                self.get_logger().error("No corners detected")
-                return  # Exit early if no tags detected
 
 
             if self.camera_matrix is not None and self.dist_coeffs is not None:
@@ -159,8 +158,8 @@ class Aruco_detect(Node):
                     marker_id = ids[i][0]  # Get the marker ID
 
                     # Check the number of position stored of the marker with the same ID
-                    if len(self.aruco_positions[marker_id]) > 50:
-                        self.get_logeer().info(f"Maximum number of positions of ID {marker_id} reached")
+                    if len(self.aruco_positions[marker_id]) > self.pos_queue_size:
+                        self.get_logger().info(f"Maximum number of positions of ID {marker_id} reached")
                         continue
                     
                     self.get_logger().info(f"Tag ID: {marker_id}, Relative to camera: x={tvec[0][0]}, y={tvec[0][1]}, z={tvec[0][2]}")
@@ -201,7 +200,7 @@ class Aruco_detect(Node):
 
             else:
                 # If no tags detected, print message
-                self.get_logger().info("No ArUco markers detected")
+                pass
 
         except Exception as e:
             self.get_logger().error(f"Failed to process image: {e}")
