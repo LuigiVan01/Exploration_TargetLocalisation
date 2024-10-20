@@ -463,9 +463,9 @@ class Autopilot(Node):
 
                 if self.localisation_started:
                     time.sleep(15)
+                    self.next_waypoint()
                     self.localisation_started = False
                     self.aruco_detected = False
-                    self.next_waypoint()
 
             if event.node_name == 'GoalUpdated' and event.current_status =='FAILURE':
                 self.goal_updated_counter += 1

@@ -58,6 +58,8 @@ class Aruco_detect(Node):
         self.update_interval = 2.0  # Update navigation goal every 2 seconds
         self.navigation_timer = self.create_timer(self.update_interval, self.update_estimates)
 
+        self.received_image = False
+
         # Subscribe to /pose to determine the position of Turtlebot
         self.position_subscriber = self.create_subscription(
             PoseWithCovarianceStamped,
@@ -106,7 +108,10 @@ class Aruco_detect(Node):
         self.robot_orientation = [orientation_q.x, orientation_q.y, orientation_q.z, orientation_q.w]
 
     def image_callback(self, msg: Image):
-        self.get_logger().info('Received image for ArUco detection')
+
+        if not self.received_image:
+            self.get_logger().info('Received image for ArUco detection')
+            self.receivd_image = True
 
         try:
             # Convert ROS image message to OpenCV format
@@ -152,6 +157,11 @@ class Aruco_detect(Node):
 
                 for i, (rvec, tvec) in enumerate(zip(rvecs, tvecs)):
                     marker_id = ids[i][0]  # Get the marker ID
+
+                    # Check the number of position stored of the marker with the same ID
+                    if len(self.aruco_positions[marker_id]) > 50:
+                        self.get_logeer().info(f"Maximum number of positions of ID {marker_id} reached")
+                        continue
                     
                     self.get_logger().info(f"Tag ID: {marker_id}, Relative to camera: x={tvec[0][0]}, y={tvec[0][1]}, z={tvec[0][2]}")
                     
@@ -180,8 +190,8 @@ class Aruco_detect(Node):
                         self.aruco_positions[marker_id].append(aruco_map_frame)
                         
                         # Limit the list to the last 20 positions for each marker
-                        if len(self.aruco_positions[marker_id]) > 15:
-                            self.aruco_positions[marker_id] = self.aruco_positions[marker_id][-15:]
+                        #if len(self.aruco_positions[marker_id]) > 15:
+                        #    self.aruco_positions[marker_id] = self.aruco_positions[marker_id][-15:]
                         
                     
                     except TransformException as ex:
