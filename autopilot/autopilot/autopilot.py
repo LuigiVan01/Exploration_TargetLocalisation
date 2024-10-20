@@ -52,6 +52,10 @@ class Autopilot(Node):
         # Initialize the number of waypoints published with the new strategy
         self.new_strategy_counter = 0
 
+
+        self.aruco_detected = False
+        self.localisation_started = False
+
         # Initialize the current grid
         self.current_grid = OccupancyGrid()
 
@@ -71,7 +75,7 @@ class Autopilot(Node):
         self.potential_coordinate.point.y = 0.0
 
         #Initializing current position variable
-        self.current_position = PointStamped()
+        self.current_position = PoseStamped()
         self.current_position.header.frame_id = 'map'
 
         #Initializing number of iterations before the strategy is changed
@@ -225,8 +229,8 @@ class Autopilot(Node):
                     self.get_logger().info('Checking Point Distance')
 
                     distance2new = math.sqrt(
-                        (self.potential_coordinate.point.x - self.current_position.point.x)**2 +
-                        (self.potential_coordinate.point.y- self.current_position.point.y)**2
+                        (self.potential_coordinate.point.x - self.current_position.pose.position.x)**2 +
+                        (self.potential_coordinate.point.y- self.current_position.pose.position.y)**2
                     )
 
 
@@ -280,8 +284,8 @@ class Autopilot(Node):
             [self.potential_coordinate.point.x, self.potential_coordinate.point.y] = self.cell_coordinates(index)
 
             distance2new = math.sqrt(
-                        (self.potential_coordinate.point.x - self.current_position.point.x)**2 +
-                        (self.potential_coordinate.point.y- self.current_position.point.y)**2
+                        (self.potential_coordinate.point.x - self.current_position.pose.position.x)**2 +
+                        (self.potential_coordinate.point.y- self.current_position.pose.position.y)**2
                     ) 
 
             # Check if the distance is greater than 9 meters and counter is not a multiple of four
@@ -302,8 +306,8 @@ class Autopilot(Node):
             self.get_logger().error(f"List of points is empty: {e}")
 
         distance2new = math.sqrt(
-                        (self.potential_coordinate.point.x - self.current_position.point.x)**2 +
-                        (self.potential_coordinate.point.y- self.current_position.point.y)**2
+                        (self.potential_coordinate.point.x - self.current_position.pose.position.x)**2 +
+                        (self.potential_coordinate.point.y- self.current_position.pose.position.y)**2
                     )
         
         self.get_logger().info('New Strategy: Point Distance:' + str(distance2new))
@@ -383,19 +387,63 @@ class Autopilot(Node):
 
     def current_position_callback(self, msg:PoseWithCovarianceStamped):
         #Return current robot pose, unless searching_for_waypoint
-        self.current_position.point.x = msg.pose.pose.position.x
-        self.current_position.point.y = msg.pose.pose.position.y
+        self.current_position.pose.position.x = msg.pose.pose.position.x
+        self.current_position.pose.position.y = msg.pose.pose.position.y
+        self.current_position.pose.orientation = msg.pose.pose.orientation
         self.current_position.header.frame_id = msg.header.frame_id
 
 
     def aruco_map_position_callback(self, msg:PointStamped):
         
-        self.new_waypoint.pose.position.x = msg.point.x
+        self.aruco_detected = True
+        if not self.localisation_started:
+            aruco_position = PointStamped()
+            aruco_position = msg
+            # Calculate distance to ArUco marker
+            dx = aruco_position.point.x - self.current_position.pose.position.x
+            dy = aruco_position.point.y - self.current_position.pose.position.y
+            distance = math.sqrt(dx*dx + dy*dy)
+
+            if distance > 1.5:
+                # If further than 1.5 meters, move towards the ArUco marker
+                self.new_waypoint = PoseStamped()
+                self.new_waypoint.header.frame_id = 'map'
+                self.new_waypoint.header.stamp = self.get_clock().now().to_msg()
+                
+                # Calculate position 1.5 meters away from the ArUco marker
+                ratio = 1 - (1.5 / distance)
+                self.new_waypoint.pose.position.x = self.current_position.pose.position.x + dx * ratio
+                self.new_waypoint.pose.position.y = self.current_position.pose.position.y + dy * ratio
+                
+                # Calculate orientation towards the ArUco marker
+                angle = math.atan2(dy, dx)
+                self.new_waypoint.pose.orientation.z = math.sin(angle / 2)
+                self.new_waypoint.pose.orientation.w = math.cos(angle / 2)
+
+                self.waypoint_publisher.publish(self.new_waypoint)
+                self.get_logger().info('Moving towards the ArUco Marker')
+                self.localisation_started = True
+            else:
+                # If within 1.5 meters, stop and wait
+                self.get_logger().info('Within 1.5 meters of ArUco Marker. Stopping for 15 seconds.')
+                
+                # Publish current position as waypoint to make the robot stop
+                stop_waypoint = PoseStamped()
+                stop_waypoint.header.frame_id = 'map'
+                stop_waypoint.header.stamp = self.get_clock().now().to_msg()
+                stop_waypoint.pose.position.x = self.current_position.pose.position.x
+                stop_waypoint.pose.position.y = self.current_position.pose.position.y
+                stop_waypoint.pose.orientation = self.current_position.pose.orientation
+                self.waypoint_publisher.publish(stop_waypoint)
+                self.localisation_started = True
+
+
+        """ self.new_waypoint.pose.position.x = msg.point.x
         self.new_waypoint.pose.position.y = msg.point.y
         self.waypoint_publisher.publish(self.new_waypoint)
         self.get_logger().info('Going towards the Aruco Marker')
         time.sleep(10)
-        
+        """
        
 
     def readiness_check(self, msg:BehaviorTreeLog):
@@ -408,14 +456,23 @@ class Autopilot(Node):
 
             if event.node_name == 'NavigateRecovery' and event.current_status =='IDLE':
                 self.get_logger().info('NavigateRecovery--IDLE received')
-                self.next_waypoint()
-                self.goal_updated_counter = 0
+
+                if not self.aruco_detected:
+                    self.next_waypoint()
+                    self.goal_updated_counter = 0
+
+                if self.localisation_started:
+                    time.sleep(15)
+                    self.localisation_started = False
+                    self.aruco_detected = False
+                    self.next_waypoint()
 
             if event.node_name == 'GoalUpdated' and event.current_status =='FAILURE':
                 self.goal_updated_counter += 1
                 if self.goal_updated_counter > 500:
-                    self.next_waypoint()
-                    self.goal_updated_counter = 0
+                    if not self.aruco_detected:
+                        self.next_waypoint()
+                        self.goal_updated_counter = 0
 
 
 def main():
