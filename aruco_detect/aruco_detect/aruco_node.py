@@ -77,15 +77,6 @@ class Aruco_detect(Node):
             3
         )       
     
-    '''    def quaternion_to_yaw(self, x, y, z, w):
-            """
-            Convert a quaternion to yaw angle (rotation around Z axis)
-            """
-            # Calculate yaw (z-axis rotation) from quaternion
-            siny_cosp = 2 * (w * z + x * y)
-            cosy_cosp = 1 - 2 * (y * y + z * z)
-            yaw = math.atan2(siny_cosp, cosy_cosp)
-            return yaw'''
 
     def current_position_callback(self, msg: PoseWithCovarianceStamped):
 
