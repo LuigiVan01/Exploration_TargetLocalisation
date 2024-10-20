@@ -17,6 +17,10 @@ from tf2_ros import TransformException
 from tf2_ros.buffer import Buffer
 from tf2_ros.transform_listener import TransformListener
 import tf2_geometry_msgs
+from collections import defaultdict
+from visualization_msgs.msg import Marker, MarkerArray
+
+
 
 CALIBARATION_FILE_RELATIVE_PATH = "../../../../../../src/metr4202_2024_team20/aruco_detect/calibration_file.yaml"
 
@@ -48,6 +52,12 @@ class Aruco_detect(Node):
         self.tf_buffer = Buffer()
         self.tf_listener = TransformListener(self.tf_buffer, self)
 
+        # Dictionary to store ArUco marker positions
+        self.aruco_positions = defaultdict(list)
+        
+        self.update_interval = 2.0  # Update navigation goal every 2 seconds
+        self.navigation_timer = self.create_timer(self.update_interval, self.update_estimates)
+
         # Subscribe to /pose to determine the position of Turtlebot
         self.position_subscriber = self.create_subscription(
             PoseWithCovarianceStamped,
@@ -76,6 +86,12 @@ class Aruco_detect(Node):
             'aruco_map_position',
             3
         )       
+
+        self.marker_publisher = self.create_publisher(
+            MarkerArray, 
+            'aruco_average_positions', 
+            10
+        )
     
 
     def current_position_callback(self, msg: PoseWithCovarianceStamped):
@@ -132,14 +148,13 @@ class Aruco_detect(Node):
                                                                       self.dist_coeffs)
                 if rvecs is None or tvecs is None:
                     self.get_logger().error("Failed to estimate pose for ArUco marker")
+                    return
 
-
-                for rvec, tvec in zip(rvecs, tvecs):
-                    # Calculate the tag coordinates relative to the camera
-                    self.get_logger().info(
-                        f"Tag ID: {ids}, Relative to camera: x={tvec[0][0]}, y={tvec[0][1]}, z={tvec[0][2]}")
+                for i, (rvec, tvec) in enumerate(zip(rvecs, tvecs)):
+                    marker_id = ids[i][0]  # Get the marker ID
                     
-
+                    self.get_logger().info(f"Tag ID: {marker_id}, Relative to camera: x={tvec[0][0]}, y={tvec[0][1]}, z={tvec[0][2]}")
+                    
                     aruco = PointStamped()
                     aruco.header.frame_id = 'camera_rgb_optical_frame'
                     aruco.point.x = tvec[0][0]
@@ -147,31 +162,29 @@ class Aruco_detect(Node):
                     aruco.point.z = tvec[0][2]
                     self.aruco_position_publisher.publish(aruco)
 
-                    # Get target position in map frame 
                     try:
-                        # Wait for the transform to be available
                         self.tf_buffer.can_transform('map', 'camera_rgb_optical_frame', rclpy.time.Time())
-                        
-                        # Transform the point from camera frame to map frame
                         transform = self.tf_buffer.lookup_transform(
                             'map',
                             'camera_rgb_optical_frame',
                             rclpy.time.Time())
                         aruco_map_frame = tf2_geometry_msgs.do_transform_point(aruco, transform)
                         
-                        self.get_logger().info(f"Tag ID: {ids}, Global Position: x={aruco_map_frame.point.x}, y={aruco_map_frame.point.y}, z={aruco_map_frame.point.z}")
+                        self.get_logger().info(f"Tag ID: {marker_id}, Global Position: x={aruco_map_frame.point.x}, y={aruco_map_frame.point.y}, z={aruco_map_frame.point.z}")
                         
-
-                        # Store or update the position of this ArUco marker
-                        #marker_id = ids[i]
-                        #self.aruco_positions[marker_id] = aruco_map_frame.point 
+                        # Store the position in the dictionary
+                        self.aruco_positions[marker_id].append(aruco_map_frame)
+                        
+                        # Limit the list to the last 20 positions for each marker
+                        #if len(self.aruco_positions[marker_id]) > 20:
+                        #    self.aruco_positions[marker_id] = self.aruco_positions[marker_id][-20:]
+                        
                         # Publish the transformed position
                         self.aruco_map_position_publisher.publish(aruco_map_frame)
                         
                     except TransformException as ex:
                         self.get_logger().error(f"Could not transform tag position to map frame: {ex}")
-
-                    
+                
                     time.sleep(1)
 
             else:
@@ -182,7 +195,54 @@ class Aruco_detect(Node):
             self.get_logger().error(f"Failed to process image: {e}")
 
 
-            
+    def update_estimates(self):
+        """
+        Calculate the average position for each ArUco marker ID and publish for visualization
+        """
+        if not self.aruco_positions:
+            self.get_logger().info("No ArUco marker positions to process")
+            return
+
+        marker_array = MarkerArray()
+
+        for marker_id, positions in self.aruco_positions.items():
+            if not positions:
+                continue
+
+            avg_x = sum(p.point.x for p in positions) / len(positions)
+            avg_y = sum(p.point.y for p in positions) / len(positions)
+            avg_z = sum(p.point.z for p in positions) / len(positions)
+
+            avg_position = PointStamped()
+            avg_position.header = positions[0].header
+            avg_position.point.x = avg_x
+            avg_position.point.y = avg_y
+            avg_position.point.z = avg_z
+
+            # Create a marker for this average position
+            marker = Marker()
+            marker.header = avg_position.header
+            marker.ns = "aruco_average_positions"
+            marker.id = int(marker_id)
+            marker.type = Marker.SPHERE
+            marker.action = Marker.ADD
+            marker.pose.position.x = avg_x
+            marker.pose.position.y = avg_y
+            marker.pose.position.z = avg_z
+            marker.scale.x = 0.3
+            marker.scale.y = 0.3
+            marker.scale.z = 0.3
+            marker.color.a = 1.0
+            marker.color.r = 1.0
+            marker.color.g = 0.0
+            marker.color.b = 0.0
+
+            marker_array.markers.append(marker)
+
+            self.get_logger().info(f"Average position for ArUco ID {marker_id}: x={avg_x:.2f}, y={avg_y:.2f}, z={avg_z:.2f}")
+
+            # Publish the marker array for visualization
+            self.marker_publisher.publish(marker_array)
 
     def load_camera_parameters(self):
 
