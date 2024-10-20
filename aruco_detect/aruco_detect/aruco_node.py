@@ -143,11 +143,6 @@ class Aruco_detect(Node):
                 # If Aruco tags detected, print the tag IDs
                 self.get_logger().info(f"Detected ArUco marker(s) with ID(s): {ids}")
 
-                """# Visualize the detected tags, display on the image
-                cv2.aruco.drawDetectedMarkers(cv_image, corners, ids)
-                cv2.imshow("Detected ArUco Markers", cv_image)
-                cv2.waitKey(1)  # 1ms delay to update the window"""
-
                 rvecs, tvecs, _ = cv2.aruco.estimatePoseSingleMarkers(corners, tag_size_in_meters, self.camera_matrix,
                                                                       self.dist_coeffs)
                 if rvecs is None or tvecs is None:
@@ -187,10 +182,7 @@ class Aruco_detect(Node):
 
                         # Store the position in the dictionary
                         self.aruco_positions[marker_id].append(aruco_map_frame)
-                        
-                        # Limit the list to the last 20 positions for each marker
-                        #if len(self.aruco_positions[marker_id]) > 15:
-                        #    self.aruco_positions[marker_id] = self.aruco_positions[marker_id][-15:]
+                    
                         
                     
                     except TransformException as ex:
@@ -199,7 +191,6 @@ class Aruco_detect(Node):
                     time.sleep(1)
 
             else:
-                # If no tags detected, print message
                 pass
 
         except Exception as e:
