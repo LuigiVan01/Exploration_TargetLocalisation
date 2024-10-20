@@ -53,7 +53,7 @@ class Autopilot(Node):
         self.new_strategy_counter = 0
 
         # Initiliazing distance to localise to ArUco marker
-        self.distance_2_aruco=1.5
+        self.desired_distance=1.5
 
 
         self.aruco_detected = False
@@ -406,14 +406,14 @@ class Autopilot(Node):
             dy = aruco_position.point.y - self.current_position.pose.position.y
             distance = math.sqrt(dx*dx + dy*dy)
 
-            if distance > self.distance_2_aruco:
-                # If further than 1 meters, move towards the ArUco marker
+            if distance > self.desired_distance:
+                # If further than 1.5 meters, move towards the ArUco marker
                 self.new_waypoint = PoseStamped()
                 self.new_waypoint.header.frame_id = 'map'
                 self.new_waypoint.header.stamp = self.get_clock().now().to_msg()
                 
-                # Calculate position 1 meters away from the ArUco marker
-                ratio = 1 - (self.distance_2_aruco / distance)
+                # Calculate position 1.5 meters away from the ArUco marker
+                ratio = 1 - (self.desired_distance/ distance)
                 self.new_waypoint.pose.position.x = self.current_position.pose.position.x + dx * ratio
                 self.new_waypoint.pose.position.y = self.current_position.pose.position.y + dy * ratio
                 
@@ -439,13 +439,6 @@ class Autopilot(Node):
                 self.waypoint_publisher.publish(stop_waypoint)
                 self.localisation_started = True
 
-
-        """ self.new_waypoint.pose.position.x = msg.point.x
-        self.new_waypoint.pose.position.y = msg.point.y
-        self.waypoint_publisher.publish(self.new_waypoint)
-        self.get_logger().info('Going towards the Aruco Marker')
-        time.sleep(10)
-        """
        
 
     def readiness_check(self, msg:BehaviorTreeLog):

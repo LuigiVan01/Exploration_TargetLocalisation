@@ -159,7 +159,7 @@ class Aruco_detect(Node):
 
                     # Check the number of position stored of the marker with the same ID
                     if len(self.aruco_positions[marker_id]) > self.pos_queue_size:
-                        self.get_logger().info(f"Maximum number of positions of ID {marker_id} reached")
+                        self.get_logger().info(f"Maximum number of measures reached for ID {marker_id} ")
                         continue
                     
                     self.get_logger().info(f"Tag ID: {marker_id}, Relative to camera: x={tvec[0][0]}, y={tvec[0][1]}, z={tvec[0][2]}")
