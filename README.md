@@ -36,9 +36,9 @@ To install this project, follow these steps:
    git clone https://github.com/LuigiVan01/metr4202_2024_team20.git
    ```
 
-2. Copy the "autopilot" and "aruco_detect" found in the repository, to the "src" folder in your workspace (your workspace should now have folders "src", "autopilot", and "aruco_detect"):
+2. Copy the "autopilot" and "aruco_detect" found in the repository, to the "src" folder in your workspace
 
-3. Build the workspace:
+3. Build the workspace (after this step your workspace should now have folders "src", "install" and "build", with folders "autopilot" and "aruco_detect" in the "src" folder):
    ```
    cd ~/workspace_name/
    colcon build
@@ -51,32 +51,30 @@ To install this project, follow these steps:
    source /usr/share/gazebo/setup.sh
    ```
 
-5.
-
 ## Running Autopilot and Detection in Gazebo Simulations
 
 To run the Autopilot package:
 
-1. Launch Gazebo with your Turtlebot3 model (you can replace `turtlebot3_world.launch.py` with the appropriate launch file of the map you want to explore, this is located by default in: /metr4202_2024_team20/src):
+1. Launch a world file in Gazebo (the command given below assumes the "Turtlebot3 Simulation Package" has been installed, and will therefore depend on what gazebo models are installed on your system):
    ```
    ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
    ```
 
-2. Launch Nav2 and SLAM Toolbox :
+2. In a new terminal tab or window, run navigation2 using Rviz, running slam and using the simulation clock:
    ```
    ros2 launch turtlebot3_navigation2 navigation2.launch.py use_sim_time:=True slam:=True
    ```
 
-3. Launch the Autopilot node:
+4. In a new terminal tab or window, run the Autopilot node:
    ```
-   ros2 launch metr4202_2024_team20 autopilot_launch.py
+   ros2 launch autopilot autopilot.py
    ```
 
-4. Launch the Aruco Detection node:
+5. In a new terminal tab or window, run the Aruco Detection node:
    ```
    ros2 launch metr4202_2024_team20 aruco_launch.py
    ```
-## Running Autopilot and Detection within Physical Environment
+## Running Autopilot and Detection within a Physical Environment
 
 To run the Autopilot package:
 
