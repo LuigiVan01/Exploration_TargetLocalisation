@@ -195,7 +195,7 @@ class Autopilot(Node):
                     self.fully_mapped = True
                     self.new_strat_counter = 0
                 if points_checked > 10000:
-                    self.get_logger().info('Could not find point after 10000 iterations, adopting new strategy...')
+                    self.get_logger().info('Maximum number of iterations exceeded, adopting new strategy...')
                     time.sleep(2)
                     self.new_strategy()
                     self.new_strat_counter += 1
@@ -206,7 +206,6 @@ class Autopilot(Node):
                 # Added this so that the terminal isn't filled with messages so it's easier to read
                 if not still_looking:
                     self.get_logger().info('Searching for good point...')
-                    self.get_logger().info('algorithm change at end') 
                     still_looking = True
 
                 # Taking a random cell and the corresponding cost value
