@@ -172,16 +172,18 @@ class Aruco_detect(Node):
                         
                         self.get_logger().info(f"Tag ID: {marker_id}, Global Position: x={aruco_map_frame.point.x}, y={aruco_map_frame.point.y}, z={aruco_map_frame.point.z}")
                         
+                        # Publish the transformed position
+                        self.aruco_map_position_publisher.publish(aruco_map_frame)
+                        
+
                         # Store the position in the dictionary
                         self.aruco_positions[marker_id].append(aruco_map_frame)
                         
                         # Limit the list to the last 20 positions for each marker
-                        #if len(self.aruco_positions[marker_id]) > 20:
-                        #    self.aruco_positions[marker_id] = self.aruco_positions[marker_id][-20:]
+                        if len(self.aruco_positions[marker_id]) > 15:
+                            self.aruco_positions[marker_id] = self.aruco_positions[marker_id][-15:]
                         
-                        # Publish the transformed position
-                        self.aruco_map_position_publisher.publish(aruco_map_frame)
-                        
+                    
                     except TransformException as ex:
                         self.get_logger().error(f"Could not transform tag position to map frame: {ex}")
                 

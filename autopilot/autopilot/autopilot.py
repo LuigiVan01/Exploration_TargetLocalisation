@@ -389,7 +389,7 @@ class Autopilot(Node):
 
 
     def aruco_map_position_callback(self, msg:PointStamped):
-        #
+        
         self.new_waypoint.pose.position.x = msg.point.x
         self.new_waypoint.pose.position.y = msg.point.y
         self.waypoint_publisher.publish(self.new_waypoint)
