@@ -47,6 +47,8 @@ To install this project, follow these steps:
    workspace_name
    └── src
        ├── autopilot_package
+       ├── aruco_package
+       ├── autopilot_physical_package
        ├── DynamixelSDK
        ├── turtlebot3
        ├── turtlebot3_msgs
@@ -101,7 +103,7 @@ The following commands will assume you followed step 9 in the last section and t
 
 5. In a new terminal tab or window, launch the Aruco Detection node:
    ```
-   ros2 launch autopilot_package aruco.launch.py
+   ros2 launch aruco_package aruco.launch.py
    ```
 
 ## Running Autopilot and Detection within a Physical Environment
