@@ -94,9 +94,14 @@ The following commands will assume you followed step 9 in the last section and t
    ros2 launch turtlebot3_navigation2 navigation2.launch.py use_sim_time:=True slam:=True
    ```
 
-4. In a new terminal tab or window, run the Autopilot and Aruco Detection nodes:
+4. In a new terminal tab or window, launch the Autopilot node:
    ```
-   ros2 launch autopilot_package combined.launch.py
+   ros2 launch autopilot_package autopilot.launch.py
+   ```
+
+5. In a new terminal tab or window, launch the Aruco Detection node:
+   ```
+   ros2 launch autopilot_package aruco.launch.py
    ```
 
 ## Running Autopilot and Detection within a Physical Environment
