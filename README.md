@@ -109,7 +109,7 @@ The following steps assume that you are using a computer on which you have follo
 
 1. ssh into your Turtlebot and enter your credentials when prompted:
    ```
-   ssh ubuntu@192.168.0.<ID>
+   ssh ubuntu@<Turtlebot3's IP address>
    ```
 
 2. Within your Turtlebot's home directory, clone the repository:
