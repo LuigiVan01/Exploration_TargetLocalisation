@@ -288,6 +288,10 @@ ros2 launch autopilot_package <launch-file-name>
 
 ![image](https://github.com/user-attachments/assets/3b95c2cd-ff7f-4cb1-9621-fefabce8e64f)
 
+### Narrows
+
+![image](https://github.com/user-attachments/assets/94c842b1-d087-40ad-a1eb-40d52d192721)
+
 
 # Contributors
   Team 20:
