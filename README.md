@@ -166,7 +166,7 @@ The following steps assume that you are using a computer on which you have follo
    ```
     
      
-## Project Structure
+# Project Structure
 
 ```
 metr4202_2024_team20/autopilot_package
@@ -270,23 +270,26 @@ metr4202_2024_team20/aruco_package
 
 
 ```
-## Custom Maps
+# Custom Maps
 We have created a series of custom maps for use in testing our code. They are located in the "autopilot_package" in the "worlds" folder, and can be run with the following commmand (launch file names can be found in the "launch" folder in the "autopilot_package"):
 
 ```
 ros2 launch autopilot_package <launch-file-name>
 ```
-# This is a preview of some of the maps:
+## This is a preview of some of the maps:
 
-# labmap
+### labmap
 ![image](https://github.com/user-attachments/assets/96706ead-38aa-41f7-a2ed-0166d7934a03)
 
-# labmap3
+### labmap3
 ![image](https://github.com/user-attachments/assets/b5065c88-3e45-4ef4-a327-7ffc2e1e5638)
 
+### Project 2
+
+![image](https://github.com/user-attachments/assets/3b95c2cd-ff7f-4cb1-9621-fefabce8e64f)
 
 
-## Contributors
+# Contributors
   Team 20:
 
  - Luigi Vanacore         48543518
