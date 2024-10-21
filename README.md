@@ -225,14 +225,22 @@ metr4202_2024_team20/src/autopilot_package
 │── README.md
 └── ignore│
 
-metr4202_2024_team20/
-├──autopilot_package/
-│   └── autopilot/
-│       └── autopilot.py
-│       ├── package.xml
-│       └── setup.py   
-│── README.md
-└── ignore
+metr4202_test/src/autopilot_physical_package
+├── autopilot_physical_package
+│   ├── aruco_node_robot.py
+│   └── __init__.py
+├── launch
+│   └── aruco_robot.launch.py
+├── LICENSE
+├── package.xml
+├── resource
+│   └── autopilot_physical_package
+├── setup.cfg
+├── setup.py
+└── test
+    ├── test_copyright.py
+    ├── test_flake8.py
+    └── test_pep257.py
 ```
 
 ## Contributors
