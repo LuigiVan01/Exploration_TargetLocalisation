@@ -4,7 +4,7 @@ from launch_ros.actions import Node
 def generate_launch_description():
     return LaunchDescription([
         Node(
-            package='autopilot_package',
+            package='aruco_package',
             executable='aruco_detect',
             name='aruco_detect',
             output='screen',
