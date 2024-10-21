@@ -161,7 +161,11 @@ The following steps assume that you are using a computer on which you have follo
    export ROS_DOMAIN_ID=<ID>
    ros2 launch autopilot_package autopilot.launch.py
    ```
-9. In a new ssh terminal tab or window, launch the aruco detection node.
+10. In a new Turtlebot3 ssh terminal launch:
+   ```
+   ros2 run v4l2_camera v4l2_camera_node
+   ```
+11. In a new ssh terminal tab or window, launch the aruco detection node.
    ```
    ros2 launch autopilot_physical_package aruco_robot.launch.py
    ```
