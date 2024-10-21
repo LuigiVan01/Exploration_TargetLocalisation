@@ -22,7 +22,9 @@ from visualization_msgs.msg import Marker, MarkerArray
 
 
 
-CALIBARATION_FILE_RELATIVE_PATH = "../../../../../../src/metr4202_2024_team20/aruco_detect/calibration_file.yaml"
+CALIBARATION_FILE_RELATIVE_PATH1 = "../../../../../../src/metr4202_2024_team20/aruco_package/calibration_file.yaml"
+
+CALIBARATION_FILE_RELATIVE_PATH2 = "../../../../../../src/aruco_package/calibration_file.yaml"
 
 
 
@@ -252,7 +254,10 @@ class Aruco_detect(Node):
         current_dir = os.path.dirname(os.path.realpath(__file__))
 
         # Go out of the current directory and then access the calibration_file.yaml
-        relative_path = os.path.join(current_dir,CALIBARATION_FILE_RELATIVE_PATH )
+        try:
+            relative_path = os.path.join(current_dir,CALIBARATION_FILE_RELATIVE_PATH1)
+        except:
+            relative_path = os.path.join(current_dir,CALIBARATION_FILE_RELATIVE_PATH2)
 
         # Normalize the path to handle any system-specific path formatting
         relative_path = os.path.normpath(relative_path)
