@@ -4,9 +4,9 @@ from launch_ros.actions import Node
 def generate_launch_description():
     return LaunchDescription([
         Node(
-            package='aruco_detect',
-            executable='aruco_node',
-            name='aruco_node',
+            package='autopilot_package',
+            executable='aruco_detect',
+            name='aruco_detect',
             output='screen',
             parameters=[
                 {'use_sim_time': True}
