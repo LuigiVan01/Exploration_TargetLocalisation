@@ -47,6 +47,8 @@ To install this project, follow these steps:
    workspace_name
    └── src
        ├── autopilot_package
+       ├── aruco_package
+       ├── autopilot_physical_package
        ├── DynamixelSDK
        ├── turtlebot3
        ├── turtlebot3_msgs
@@ -94,9 +96,14 @@ The following commands will assume you followed step 9 in the last section and t
    ros2 launch turtlebot3_navigation2 navigation2.launch.py use_sim_time:=True slam:=True
    ```
 
-4. In a new terminal tab or window, run the Autopilot and Aruco Detection nodes:
+4. In a new terminal tab or window, launch the Autopilot node:
    ```
-   ros2 launch autopilot_package combined.launch.py
+   ros2 launch autopilot_package autopilot.launch.py
+   ```
+
+5. In a new terminal tab or window, launch the Aruco Detection node:
+   ```
+   ros2 launch aruco_package aruco.launch.py
    ```
 
 ## Running Autopilot and Detection within a Physical Environment
@@ -104,7 +111,7 @@ The following steps assume that you are using a computer on which you have follo
 
 1. ssh into your Turtlebot and enter your credentials when prompted:
    ```
-   ssh ubuntu@192.168.0.<ID>
+   ssh ubuntu@Turtlebot3_IP_address
    ```
 
 2. Within your Turtlebot's home directory, clone the repository:
@@ -154,7 +161,11 @@ The following steps assume that you are using a computer on which you have follo
    export ROS_DOMAIN_ID=<ID>
    ros2 launch autopilot_package autopilot.launch.py
    ```
-9. In a new ssh terminal tab or window, launch the aruco detection node.
+10. In a new Turtlebot3 ssh terminal launch:
+   ```
+   ros2 run v4l2_camera v4l2_camera_node
+   ```
+11. In a new ssh terminal tab or window, launch the aruco detection node.
    ```
    ros2 launch autopilot_physical_package aruco_robot.launch.py
    ```
