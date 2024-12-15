@@ -1,6 +1,6 @@
-# Autopilot Package
+# Exploration and 
 
-This repository contains the 'autopilot_package', 'aruco_package' and 'autopilot_physical_package'. The 'autopilot_package' is designed to send waypoints to a robot using SLAM Toolbox and Nav2 to explore an unknown map. The 'aruco_package' allows to detect and localise aruco targets in the map. The 'autopilot_physical_package' is the version that contains the detection node which is  advisible to be run on the robot. The project is set up for use with Gazebo and ROS2 Humble, specifically using the Turtlebot3 robot.
+This repository contains the `autopilot_package`, `aruco_package` and `autopilot_physical_package`. The `autopilot_package` is designed to send waypoints to a robot using SLAM Toolbox and Nav2 to explore an unknown map. The `aruco_package` allows to detect and localise aruco targets in the map. The `autopilot_physical_package` is the version that contains the detection node which is  advisible to be run on the robot. The project is set up for use with Gazebo and ROS2 Humble, specifically using the Turtlebot3 robot. `brief_report.pdf` is a short report about how the codes work.
 
 ## Table of Contents
 - [Prerequisites](#prerequisites)
