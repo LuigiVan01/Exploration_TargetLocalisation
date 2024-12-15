@@ -294,11 +294,10 @@ ros2 launch autopilot_package <launch-file-name>
 
 
 # Contributors
-  Team 20:
 
- - Luigi Vanacore (LuigiVan01)      48543518
- - ZhuoXin Shi (zhuobykt)           48969761
- - Francis Weber (frankotothe)      46992288
- - Ricardo Westerman (ricowest)     45829453
- - Rui Xia  (RayAutisticSoloXia)    43507917
+ - Luigi Vanacore (LuigiVan01)      
+ - ZhuoXin Shi (zhuobykt)           
+ - Francis Weber (frankotothe)      
+ - Ricardo Westerman (ricowest)     
+ - Rui Xia  (RayAutisticSoloXia)    
 
