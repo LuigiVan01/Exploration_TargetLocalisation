@@ -1,0 +1,37 @@
+FROM ros:humble
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    ros-humble-gazebo-* \
+    ros-humble-cartographer \
+    ros-humble-cartographer-ros \
+    ros-humble-navigation2 \
+    ros-humble-nav2-bringup \
+    ros-humble-rviz2 \
+    python3-colcon-common-extensions \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Setup TurtleBot3 workspace
+RUN mkdir -p /root/turtlebot3_ws/turtlebot3_src && \
+    cd /root/turtlebot3_ws/turtlebot3_src && \
+    git clone -b humble https://github.com/ROBOTIS-GIT/DynamixelSDK.git && \
+    git clone -b humble https://github.com/ROBOTIS-GIT/turtlebot3_msgs.git && \
+    git clone -b humble https://github.com/ROBOTIS-GIT/turtlebot3.git && \
+    git clone -b humble https://github.com/ROBOTIS-GIT/turtlebot3_simulations.git && \
+    cd /root/turtlebot3_ws && \
+    . /opt/ros/humble/setup.sh && \
+    colcon build --symlink-install
+
+# Set environment variables
+ENV ROS_DOMAIN_ID=30
+ENV TURTLEBOT3_MODEL=burger
+ENV ROS_WS=/root/turtlebot3_ws
+
+# Source ROS and workspace automatically
+RUN echo "source /opt/ros/humble/setup.bash" >> /root/.bashrc && \
+    echo "source /usr/share/gazebo/setup.sh" >> /root/.bashrc && \
+    echo "source /root/turtlebot3_ws/install/setup.bash" >> /root/.bashrc
+
+WORKDIR /root/turtlebot3_ws
+CMD ["/bin/bash"]
