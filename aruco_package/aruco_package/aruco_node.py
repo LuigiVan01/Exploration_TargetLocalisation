@@ -19,19 +19,14 @@ from tf2_ros.transform_listener import TransformListener
 import tf2_geometry_msgs
 from collections import defaultdict
 from visualization_msgs.msg import Marker, MarkerArray
-
-
-
-CALIBARATION_FILE_RELATIVE_PATH1 = "../../../../../../src/metr4202_2024_team20/aruco_package/calibration_file.yaml"
-
-CALIBARATION_FILE_RELATIVE_PATH2 = "../../../../../../src/aruco_package/calibration_file.yaml"
+from ament_index_python.packages import get_package_share_directory
 
 
 
 class Aruco_detect(Node):
 
     def __init__(self):
-        super().__init__('autopilot')
+        super().__init__('aruco_detect')
         self.camera_matrix = None
         self.dist_coeffs = None
         self.load_camera_parameters()
@@ -250,28 +245,21 @@ class Aruco_detect(Node):
 
     def load_camera_parameters(self):
 
-        # Get the current directory of the script
-        current_dir = os.path.dirname(os.path.realpath(__file__))
-
-        # Go out of the current directory and then access the calibration_file.yaml
         try:
-            relative_path = os.path.join(current_dir,CALIBARATION_FILE_RELATIVE_PATH1)
+            # Get share path and find the calibration file
+            package_share_directory = get_package_share_directory('aruco_package')  
+            calibration_file_path = os.path.join(package_share_directory, 'calibration_file.yaml')
+
+            self.get_logger().info(f"Loading camera parameters from: {calibration_file_path}")
         except:
-            relative_path = os.path.join(current_dir,CALIBARATION_FILE_RELATIVE_PATH2)
-
-        # Normalize the path to handle any system-specific path formatting
-        relative_path = os.path.normpath(relative_path)
-
-
-        self.get_logger().info(f"Loading camera parameters from: {relative_path}")
+            self.get_logger().error(f"Error finding or loading camera parameters: {str(e)}")
 
         try:
-            with open(relative_path, 'r') as file:
+            with open(calibration_file_path, 'r') as file:
                 camera_data = yaml.safe_load(file)
 
                 self.camera_matrix = np.array(camera_data['camera_matrix']['data']).reshape((3, 3))
                 self.dist_coeffs = np.array(camera_data['distortion_coefficients']['data']).reshape((1, 5))
-                #self.projection_matrix = np.array(camera_data['projection_matrix']['data']).reshape((3, 4))
         except Exception as e:
             self.get_logger().error(f"Error opening parameters file: {str(e)}")
     
