@@ -9,8 +9,6 @@ Different waypoints (shown in purple in the demo) are evaluated based on their p
 
 ## Usage
 
-There are two recommended ways to set up this project: using Docker for a streamlined experience, or a manual installation.
-
 ### Option 1: Using Docker (Recommended)
 
 The included Docker setup is the most straightforward method to get the project running, as it handles all dependencies within a container. It is highly recommended to use the [Dev Containers extension in VSCode](https://code.visualstudio.com/docs/devcontainers/containers) for a seamless workflow.
