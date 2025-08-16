@@ -357,8 +357,6 @@ class Autopilot(Node):
                 except IndexError:
                     continue
          
-
-         
         if uncertain_indexes > 20:
             return True
         elif self.fully_mapped and obstacle_indexes > 5:

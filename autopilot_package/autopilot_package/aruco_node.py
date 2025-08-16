@@ -23,6 +23,7 @@ from visualization_msgs.msg import Marker, MarkerArray
 
 
 CALIBARATION_FILE_RELATIVE_PATH = "../../../../../../src/metr4202_2024_team20/aruco_detect/calibration_file.yaml"
+CALIBARATION_FILE_RELATIVE_PATH = "../../../../../../src/metr4202_2024_team20/aruco_detect/calibration_file.yaml"
 
 
 

@@ -20,18 +20,32 @@ import os
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription
+from launch.actions import IncludeLaunchDescription, SetEnvironmentVariable
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration
+from launch.substitutions import LaunchConfiguration, EnvironmentVariable
 
 
 def generate_launch_description():
-    launch_file_dir = os.path.join(get_package_share_directory('autopilot_package'), 'launch')
+    package_dir = get_package_share_directory('autopilot_package')
+    launch_file_dir = os.path.join(package_dir, 'launch')
     pkg_gazebo_ros = get_package_share_directory('gazebo_ros')
 
     use_sim_time = LaunchConfiguration('use_sim_time', default='true')
     x_pose = LaunchConfiguration('x_pose', default='0.0')
     y_pose = LaunchConfiguration('y_pose', default='0.0')
+
+    resource_path = os.path.join(package_dir, 'resource')
+    if  'GAZEBO_RESOURCE_PATH' in os.environ:
+        resource_path = [EnvironmentVariable('GAZEBO_RESOURCE_PATH'), ':' + resource_path]
+    else:
+    	assert os.path.isdir('/usr/share/gazebo-11'), 'Gazebo not found, set GAZEBO_RESOURCE_PATH environment variable'
+    	resource_path = ['/usr/share/gazebo-11:' + resource_path]
+
+    model_path = os.path.join(package_dir, 'models')
+    if  'GAZEBO_MODEL_PATH' in os.environ:
+        model_path = [EnvironmentVariable('GAZEBO_MODEL_PATH') , ':' + model_path]
+
+    print(f"Resourcepath: {resource_path}")
 
     world = os.path.join(
         get_package_share_directory('autopilot_package'),
@@ -56,7 +70,7 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(
             os.path.join(launch_file_dir, 'robot_state_publisher.launch.py')
         ),
-        launch_arguments={'use_sim_time': use_sim_time}.items()
+        launch_arguments={'use_sim_time': use_sim_time}.items(),
     )
 
     spawn_turtlebot_cmd = IncludeLaunchDescription(
@@ -69,12 +83,12 @@ def generate_launch_description():
         }.items()
     )
 
-    ld = LaunchDescription()
-
-    # Add the commands to the launch description
-    ld.add_action(gzserver_cmd)
-    ld.add_action(gzclient_cmd)
-    ld.add_action(robot_state_publisher_cmd)
-    ld.add_action(spawn_turtlebot_cmd)
+    ld = LaunchDescription([
+        SetEnvironmentVariable(name='GAZEBO_RESOURCE_PATH', value=resource_path),
+        SetEnvironmentVariable(name='GAZEBO_MODEL_PATH', value=model_path),
+        gzserver_cmd,
+        gzclient_cmd,
+        robot_state_publisher_cmd,
+        spawn_turtlebot_cmd])
 
     return ld

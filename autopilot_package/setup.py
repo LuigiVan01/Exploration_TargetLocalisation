@@ -14,6 +14,7 @@ setup(
         ('share/' + package_name, ['package.xml']),
         (os.path.join('share', package_name, 'launch'), glob('launch/*launch.py')),
         (os.path.join('share', package_name, 'worlds'), glob('worlds/*')),
+        (os.path.join('share', package_name, 'resource/media'), glob('resource/media/**/**/*')),
         (os.path.join('share', package_name, 'urdf'), glob('urdf/*')),
         *[
     		(os.path.join('share', package_name, model_dir), [os.path.join(model_dir, f) for f in files])
