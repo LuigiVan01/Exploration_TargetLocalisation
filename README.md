@@ -2,73 +2,113 @@
 
 This repository contains the `autopilot_package`, `aruco_package` and `autopilot_physical_package`. The `autopilot_package` is designed to send waypoints to a robot using SLAM Toolbox and Nav2 to explore an unknown map. The `aruco_package` allows to detect and localise aruco targets in the map. The `autopilot_physical_package` is the version that contains the detection node which is  advisible to be run on the robot. The project is set up for use with Gazebo and ROS2 Humble, specifically using the Turtlebot3 robot. `brief_report.pdf` is a short report about how the codes work.
 
-## Table of Contents
-- [Prerequisites](#prerequisites)
-- [Installation](#installation)
-- [Project Structure](#project-structure)
-- [Contributors](#contributors)
+![Demo](demo.gif)
 
-## Prerequisites
+Different waypoints (shown in purple in the demo) are evaluated based on their proximity to obstacles and whether they lie on the exploration frontier. If, during exploration, the algorithm detects a marker (shown in red), it immediately generates a waypoint directed toward the detection. This allows the robot to collect additional measurements of the marker’s position, leading to a more accurate final estimation.
 
-Before you begin, ensure you have Ubuntu 22.04 or compatible Linux distribution and the following software installed:
+Different waypoints are evaluated based on their closeness to obstacles and their being in the frontier. The waypoints are coloured in purple in the gif. If during the exploration the algorithm detects a marker (coloured in red in the gif), it sends immediately a waypoints toward the detection of the detected marker so that the robot can get more measurements of the position of the marker and so have a better final estimation of the position.
 
-- [ROS2 Humble](https://docs.ros.org/en/humble/Installation.html)
-- [Gazebo](https://classic.gazebosim.org/tutorials?tut=install_ubuntu&cat=install)
-- [Cartographer](https://emanual.robotis.com/docs/en/platform/turtlebot3/quick-start/#pc-setup)  
-- [Navigation2](https://emanual.robotis.com/docs/en/platform/turtlebot3/quick-start/#pc-setup)
-- [TurtleBot3](https://emanual.robotis.com/docs/en/platform/turtlebot3/quick-start/#pc-setup)
-- [Numpy](https://numpy.org/install/)
+## Getting Started
 
+There are two recommended ways to set up this project: using Docker for a streamlined experience, or a manual installation.
 
-## Installation
+### Option 1: Using Docker (Recommended)
 
-To install this project, follow these steps:
+The included Docker setup is the most straightforward method to get the project running, as it handles all dependencies within a container. It is highly recommended to use the [Dev Containers extension in VSCode](https://code.visualstudio.com/docs/devcontainers/containers) for a seamless workflow.
 
-1. If you haven't already, source the ros2 installation, and create a new directory for the workspace as below (NOTE: if you haven't already created a workspace, you will need to install the "Turtlebot Simulations" package later):
-   ```
-   source /opt/ros/humble/setup.bash
-   mkdir -p ~/workspace_name/src
-   ```
-   
-2. Clone the repository into the "src" directory using the ubuntu terminal (if the terminal prompts you for credentials, sign into github within VS code etc, and use the built in terminal):
-   ```
-   cd ~/workspace_name/src
-   git clone https://github.com/LuigiVan01/metr4202_2024_team20.git
-   ```
-   
-3. OPTIONAL: If you have not already installed the "Turtlebot Simulations" package, do so now into the "src" folder. Your workspace should now contain the following folders
-   ```
-   workspace_name
-   └── src
-       ├── autopilot_package
-       ├── aruco_package
-       ├── autopilot_physical_package
-       ├── DynamixelSDK
-       ├── turtlebot3
-       ├── turtlebot3_msgs
-       └── turtlebot3_simulations
+**Prerequisites for Docker Setup:**
+
+*   [Docker](https://docs.docker.com/get-docker/)
+*   [Visual Studio Code](https://code.visualstudio.com/) with the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+
+**Usage with Docker:**
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/LuigiVan01/Turtlebot3Exploration_TargetLocalisation.git
     ```
 
-4. Build the workspace:
-   ```
-   cd ~/workspace_name
-   colcon build
-   ```
+2.  **Open in VSCode and launch the Dev Container:**
+    Open the cloned repository folder in VSCode. The Dev Containers extension will detect the `.devcontainer` configuration and prompt you to "Reopen in Container". Click this to build and launch the container.
 
-5. Source the workspace (and the gazebo setup if you haven't already):
-   ```
-   source ~/workspace_name/install/setup.bash
-   #code below is for sourcing the gazebo setup and is optional if you've already done it
-   source /usr/share/gazebo/setup.sh
-   ```
-6. Set the domain ID and Gazebo model paths (don't forget to change "workspace_name" to your workspace's name):
+3.  **Build the ROS2 packages:**
+    Once inside the container, a terminal will be available. You will already be in the `turtlebot3_ws` directory. Build the packages and source the workspace:
+    ```bash
+    colcon build
+    source install/setup.bash
+    ```
+
+4.  **Allow GUI from Docker:**
+    In a terminal on your **local machine** (not in the container), run the following command:
+    ```bash
+    xhost +local:docker
+    ```
+
+5.  **Launch the Gazebo world:**
+    In a terminal within the VSCode container, launch one of the available Gazebo worlds. For example:
+    ```bash
+    ros2 launch autopilot_package metr4202_world.launch.py
+    ```
+    *Note: You can find other available worlds in the `autopilot_package/launch` directory.*
+
+6.  **Start Navigation and SLAM:**
+    In a **new terminal** inside the container, launch Navigation2 and the SLAM Toolbox:
+    ```bash
+    ros2 launch turtlebot3_navigation2 navigation2.launch.py use_sim_time:=True slam:=True
+    ```
+
+7.  **Launch the Aruco Detection Node:**
+    In another terminal inside the container, start the Aruco marker detection:
+    ```bash
+    ros2 launch aruco_package aruco.launch.py
+    ```
+
+8.  **Launch the Autopilot Node:**
+    Finally, in a new terminal, launch the autopilot node to begin the exploration process:
+    ```bash
+    ros2 launch autopilot_package autopilot.launch.py
+    ```
+
+### Option 2: Manual Installation
+
+If you prefer a manual setup, you will need to install all the necessary dependencies on your system.
+
+**Prerequisites for Manual Installation:**
+
+*   Ubuntu 22.04 or a compatible Linux distribution.
+*   [ROS2 Humble](https://docs.ros.org/en/humble/Installation.html)
+*   [Gazebo](https://classic.gazebosim.org/tutorials?tut=install_ubuntu&cat=install)
+*   [Cartographer](https://emanual.robotis.com/docs/en/platform/turtlebot3/quick-start/#pc-setup)
+*   [Navigation2](https://emanual.robotis.com/docs/en/platform/turtlebot3/quick-start/#pc-setup)
+*   [TurtleBot3](https://emanual.robotis.com/docs/en/platform/turtlebot3/quick-start/#pc-setup)
+*   [Numpy](https://numpy.org/install/)
+
+**Usage with Manual Installation:**
+
+1.  **Clone the repository into your ROS2 workspace:**
+    Create a ROS2 workspace if you don't have one, and clone the repository into the `src` folder.
+    ```bash
+    mkdir -p turtlebot3_ws/src
+    cd turtlebot3_ws/src
+    git clone https://github.com/LuigiVan01/Turtlebot3Exploration_TargetLocalisation.git
+    ```
+
+2.  **Build the packages:**
+    Navigate to the root of your workspace, build the packages, and source the setup file.
+    ```bash
+    cd .. 
+    colcon build
+    source install/setup.bash
+    ```
+
+3. Set the domain ID and Gazebo model paths (don't forget to change "workspace_name" to your workspace's name):
    ```
    export ROS_DOMAIN_ID=30 #TURTLEBOT3
    export GAZEBO_MODEL_PATH=~/.gazebo/models:$GAZEBO_MODEL_PATH
    export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:~/workspace_name/src/turtlebot3_simulations/turtlebot3_gazebo/models
    export TURTLEBOT3_MODEL=waffle_pi
    ```
-7. Add all the source and export commands to your .bashrc so they do not need to be called in future:
+4. Add all the source and export commands to your .bashrc so they do not need to be called in future:
     ```
     echo 'source /opt/ros/humble/setup.bash' >> ~/.bashrc
     echo 'source ~/workspace_name/install/setup.bash' >> ~/.bashrc
@@ -77,28 +117,8 @@ To install this project, follow these steps:
     echo 'export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:~/workspace_name/src/turtlebot3_simulations/turtlebot3_gazebo/models' >> ~/.bashrc
     echo 'export TURTLEBOT3_MODEL=waffle_pi' >> ~/.bashrc   
     ```
-## Running Autopilot and Detection in Gazebo Simulations
-The following commands will assume you followed step 9 in the last section and therefore do not include sourcing of setup files in each new terminal tab.
 
-1. Launch a world file in Gazebo (below we are using one of the custom maps included in the autopilot package):
-   ```
-   ros2 launch autopilot_package labmap3.launch.py
-   ```
-
-2. In a new terminal tab or window, run navigation2 and slam, using the simulation clock:
-   ```
-   ros2 launch turtlebot3_navigation2 navigation2.launch.py use_sim_time:=True slam:=True
-   ```
-
-3. In a new terminal tab or window, launch the Autopilot node:
-   ```
-   ros2 launch autopilot_package autopilot.launch.py
-   ```
-
-4. In a new terminal tab or window, launch the Aruco Detection node:
-   ```
-   ros2 launch aruco_package aruco.launch.py
-   ```
+5.  Follow steps 5 through 8 from the Docker usage guide, running each `ros2 launch` command in a new terminal.
 
 ## Running Autopilot and Detection within a Physical Environment
 
