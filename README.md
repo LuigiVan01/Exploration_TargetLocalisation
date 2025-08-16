@@ -6,7 +6,6 @@ This repository contains the `autopilot_package`, `aruco_package` and `autopilot
 
 Different waypoints (shown in purple in the demo) are evaluated based on their proximity to obstacles and whether they lie on the exploration frontier. If, during exploration, the algorithm detects a marker (shown in red), it immediately generates a waypoint directed toward the detection. This allows the robot to collect additional measurements of the marker’s position, leading to a more accurate final estimation.
 
-Different waypoints are evaluated based on their closeness to obstacles and their being in the frontier. The waypoints are coloured in purple in the gif. If during the exploration the algorithm detects a marker (coloured in red in the gif), it sends immediately a waypoints toward the detection of the detected marker so that the robot can get more measurements of the position of the marker and so have a better final estimation of the position.
 
 ## Getting Started
 
