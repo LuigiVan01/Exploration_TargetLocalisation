@@ -22,7 +22,7 @@ The included Docker setup is the most straightforward method to get the project 
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/LuigiVan01/Turtlebot3Exploration_TargetLocalisation.git
+    git clone https://github.com/LuigiVan01/Exploration_TargetLocalisation.git
     ```
 
 2.  **Open in VSCode and launch the Dev Container:**
@@ -44,7 +44,7 @@ The included Docker setup is the most straightforward method to get the project 
 5.  **Launch the Gazebo world:**
     In a terminal within the VSCode container, launch one of the available Gazebo worlds. For example:
     ```bash
-    ros2 launch autopilot_package metr4202_world.launch.py
+    ros2 launch autopilot_package metr4202_demo_world.launch.py
     ```
     *Note: You can find other available worlds in the `autopilot_package/launch` directory.*
 
@@ -87,7 +87,7 @@ If you prefer a manual setup, you will need to install all the necessary depende
     ```bash
     mkdir -p turtlebot3_ws/src
     cd turtlebot3_ws/src
-    git clone https://github.com/LuigiVan01/Turtlebot3Exploration_TargetLocalisation.git
+    git clone https://github.com/LuigiVan01/Exploration_TargetLocalisation.git
     ```
 
 2.  **Build the packages:**
@@ -135,7 +135,7 @@ The following steps assume that you are using a computer on which you have follo
 3. Within your Turtlebot's "src" directory, clone the repository:
     ```
    cd ~/workspace_name/src
-   git clone https://github.com/LuigiVan01/metr4202_2024_team20.git
+   git clone https://github.com/LuigiVan01/Exploration_TargetLocalisation.git
    ```
     
 4. Build the workspace and source the setup
